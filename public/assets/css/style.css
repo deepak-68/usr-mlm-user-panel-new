@@ -1,0 +1,213 @@
+
+ 
+.bg-primary-gradient{
+    background: linear-gradient(135deg, #284a8a 0%, #aece5b 100%);
+}
+
+/* ===== Welcome Card ===== */
+.welcome-card {
+    border: none !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+    position: relative;
+}
+.welcome-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+}
+.welcome-card .card-body {
+    padding: 2rem 2.5rem !important;
+    position: relative;
+    z-index: 1;
+}
+.welcome-card .welcome-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.25rem;
+    color: #fff;
+    border: 3px solid rgba(255,255,255,0.3);
+    backdrop-filter: blur(4px);
+    flex-shrink: 0;
+}
+.welcome-card .welcome-greeting {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: .25rem;
+}
+.welcome-card .welcome-sub {
+    font-size: .9rem;
+    opacity: .85;
+    margin-bottom: 0;
+}
+.welcome-card .welcome-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: .75rem;
+}
+.welcome-card .welcome-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.12);
+    font-size: .8rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+}
+
+/* ===== KPI Card Styles ===== */
+.kpi-card {
+    transition: all 0.3s ease;
+    border: none !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    min-height: 110px;
+}
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    border-radius: 12px 0 0 12px;
+}
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+.kpi-card .card-body {
+    padding: 1.35rem 1.5rem !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+.kpi-card .kpi-label {
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #8b8e9b;
+    margin-bottom: .5rem;
+}
+.kpi-card .kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    line-height: 1.2;
+}
+.kpi-card .kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+
+/* Left border + icon themes */
+.kpi-rank::before { background: linear-gradient(180deg, #7c3aed, #a78bfa); }
+.kpi-rank .kpi-icon { background: rgba(124,58,237,0.12); color: #7c3aed; }
+
+.kpi-income::before { background: linear-gradient(180deg, #059669, #34d399); }
+.kpi-income .kpi-icon { background: rgba(5,150,105,0.12); color: #059669; }
+
+.kpi-business::before { background: linear-gradient(180deg, #2563eb, #60a5fa); }
+.kpi-business .kpi-icon { background: rgba(37,99,235,0.12); color: #2563eb; }
+
+.kpi-team::before { background: linear-gradient(180deg, #d97706, #fbbf24); }
+.kpi-team .kpi-icon { background: rgba(217,119,6,0.12); color: #d97706; }
+
+.kpi-wallet::before { background: linear-gradient(180deg, #dc2626, #f87171); }
+.kpi-wallet .kpi-icon { background: rgba(220,38,38,0.12); color: #dc2626; }
+
+.kpi-percent::before { background: linear-gradient(180deg, #0891b2, #22d3ee); }
+.kpi-percent .kpi-icon { background: rgba(8,145,178,0.12); color: #0891b2; }
+
+.kpi-balance::before { background: linear-gradient(180deg, #8b5cf6, #c4b5fd); }
+.kpi-balance .kpi-icon { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+
+.kpi-generation::before { background: linear-gradient(180deg, #ec4899, #f9a8d4); }
+.kpi-generation .kpi-icon { background: rgba(236,72,153,0.12); color: #ec4899; }
+
+.kpi-total::before { background: linear-gradient(180deg, #1e293b, #64748b); }
+.kpi-total .kpi-icon { background: rgba(30,41,59,0.12); color: #1e293b; }
+
+/* Dual value chips */
+.kpi-dual {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.kpi-dual .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: .85rem;
+    font-weight: 600;
+}
+.kpi-dual .chip-left {
+    background: rgba(37,99,235,0.1);
+    color: #2563eb;
+}
+.kpi-dual .chip-right {
+    background: rgba(220,38,38,0.1);
+    color: #dc2626;
+}
+.kpi-dual .chip-divider {
+    color: #cbd5e1;
+    font-weight: 300;
+}
+
+.btn-outline-primary {
+    --in-btn-color: #1e3a5f;
+    --in-btn-border-color: #1e3a5f;
+    --in-btn-hover-color: #fff;
+    --in-btn-hover-bg: #1e3a5f;
+    --in-btn-hover-border-color: #1e3a5f;
+    --in-btn-focus-shadow-rgb: 67, 138, 122;
+    --in-btn-active-color: #fff;
+    --in-btn-active-bg: #1e3a5f;
+    --in-btn-active-border-color: #1e3a5f;
+    --in-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --in-btn-disabled-color: #1e3a5f;
+    --in-btn-disabled-bg: transparent;
+    --in-btn-disabled-border-color: #1e3a5f;
+    --in-gradient: none
+}
+
+
+.btn-primary {
+    --in-btn-color: #fff;
+    --in-btn-bg: #1e3a5f;
+    --in-btn-border-color: #1e3a5f;
+    --in-btn-hover-color: #fff;
+    --in-btn-hover-bg: #274b79;
+    --in-btn-hover-border-color: #366e62;
+    --in-btn-focus-shadow-rgb: 95, 156, 142;
+    --in-btn-active-color: #fff;
+    --in-btn-active-bg: #274b79;
+    --in-btn-active-border-color: #274b79;
+    --in-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --in-btn-disabled-color: #fff;
+    --in-btn-disabled-bg: #1e3a5f;
+    --in-btn-disabled-border-color: #1e3a5f
+}
