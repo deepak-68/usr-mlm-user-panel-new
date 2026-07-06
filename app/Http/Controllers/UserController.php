@@ -15,68 +15,66 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-     protected string $baseUrl;
+    protected string $apiBaseUrl;
 
     public function __construct()
     {
-        $this->baseUrl = config('services.api.base_url');
+        $this->apiBaseUrl = config('services.api.base_url');
     }
 
      
     public function editProfile()
     {
-       
-        
-        $userId = Session::get('user_id');
+        $token = Session::get('token');
 
-        if (!$userId) {
+        if (!$token) {
             return redirect()
                 ->route('login')
                 ->with('error', 'Your session has expired. Please log in again.');
         }
 
         try {
-            $response = Http::timeout(10)->get($this->baseUrl  . '/profile', ['user_id' => $userId]);
-        // dd($response->json());
+            $response = Http::withToken($token)
+                ->acceptJson()
+                ->timeout(10)
+                ->get($this->apiBaseUrl . '/profile');
+                // dd($response->json());   
 
+            if ($response->unauthorized()) {
+                Session::flush();
+
+                return redirect()
+                    ->route('login')
+                    ->with('error', 'Your session has expired. Please log in again.');
+            }
 
             if ($response->failed()) {
                 Log::error('Profile API request failed', [
-                    'user_id' => $userId,
                     'status' => $response->status(),
                     'response' => $response->body(),
                 ]);
 
                 return redirect()
                     ->back()
-                    ->with('error', 'Unable to load your profile at the moment. Please try again later.');
+                    ->with('error', 'Unable to load your profile at the moment.');
             }
 
             $profile = $response->json();
-
-            if (empty($profile) || empty($profile['data'])) {
-                Session::flush();
-
-                return redirect()
-                    ->route('login')
-                    ->with('error', 'Profile information could not be found. Please log in again.');
-            }
 
             return view('pages.edit-my-profile', [
                 'user' => $profile['data'],
                 'data' => $profile,
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             Log::error('Error while fetching profile', [
-                'user_id' => $userId,
                 'message' => $e->getMessage(),
             ]);
 
             return redirect()
                 ->back()
-                ->with('error', 'Something went wrong while loading your profile. Please try again.');
+                ->with('error', 'Something went wrong while loading your profile.');
         }
     }
 
@@ -84,6 +82,7 @@ class UserController extends Controller
     public function updateProfile(Request $request)
     {
         $userId = Session::get('user_id');
+        $token = Session::get('token');
 
         if (!$userId) {
             return redirect()->route('login');
@@ -97,7 +96,7 @@ class UserController extends Controller
 
         try {
             $response = Http::timeout(10)->post(
-                $this->baseUrl . '/profile/update',
+                $this->apiBaseUrl . '/profile/update',
                 [
                     'user_id'    => $userId,
                     'first_name' => $validated['first_name'],
@@ -243,7 +242,7 @@ class UserController extends Controller
 
             $response = Http::timeout(10)
                 ->post(
-                    $this->baseUrl . '/change-password',
+                    $this->apiBaseUrl . '/change-password',
                     [
                         'user_id' => $userId,
                         'old_password' => $validated['old_password'],

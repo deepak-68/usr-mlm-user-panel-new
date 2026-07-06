@@ -42,7 +42,7 @@ use App\Http\Controllers\User\KycController;
     })->name('register');
 
     // Dashboard (protected)
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('web')->name('dashboard');
     // 3. Logout route
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 

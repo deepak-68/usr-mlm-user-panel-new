@@ -273,12 +273,12 @@
                                 <div class="col-md-8">
                                     <div class="mb-3">
                                         <label for="profile_image" class="form-label">Choose Profile Image</label>
-                                        <input type="hidden" id="user_id" name="user_id" value="{{ $user['id'] }}">
+                                        <input type="hidden" id="user_id" name="user_id" value="{{ session('user.id') }}">
                                         <input type="file" 
                                             name="profile_image" 
                                             id="profile_image" 
                                             class="form-control @error('profile_image') is-invalid @enderror"
-                                            accept="image/*"
+                                            accept="image/jpeg,image/jpg,image/png"
                                             onchange="previewImage(this)">
                                         @error('profile_image')
                                             <div class="invalid-feedback">{{ $message }}</div>

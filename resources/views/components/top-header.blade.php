@@ -37,9 +37,6 @@
             </div>
 
             <div class="d-flex align-items-center">
-
-                 
-
                 <div class="dropdown d-md-none topbar-head-dropdown header-item">
                     <button type="button" class="btn btn-icon btn-topbar btn-ghost-primary rounded-circle" id="page-header-search-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="bx bx-search fs-22"></i>
@@ -69,15 +66,14 @@
                     </button>
                 </div>
 
-             
                 <div class="dropdown header-item">
                     <button type="button" class="btn border rounded-pill" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="d-flex align-items-center">
                             <img class="rounded-circle header-profile-user"
-                                        src="{{ !empty(session('profile_image')) ? session('profile_image') : asset('assets/images/user-placeholder.png') }}"
-                                        alt="Header Avatar">
+                                src="{{ session('user.profile_image') ? session('user.profile_image') : 'https://ui-avatars.com/api/?name=' . session('user.first_name') . '+' . session('user.last_name') . '&background=random&size=128' }}"
+                                alt="Header Avatar">
                             <span class="text-start ms-xl-2">
-                                <span class="d-none d-xl-inline-block fw-medium user-name-text fs-16">{{ session('first_name') }} {{ session('last_name') }} <i class="las la-angle-down fs-12 ms-1"></i></span>
+                                <span class="d-none d-xl-inline-block fw-medium user-name-text fs-16">{{ session('user.first_name') }} {{ session('user.last_name') }} <i class="las la-angle-down fs-12 ms-1"></i></span>
                             </span>
                         </span>
                     </button>

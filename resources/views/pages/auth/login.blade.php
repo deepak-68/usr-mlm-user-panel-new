@@ -159,7 +159,7 @@
 
         .auth-bg-section {
             position: relative;
-            background: url("public/assets/images/login-bg.jpg") center center/cover no-repeat;
+            background: url("assets/images/login-bg.jpg") center center/cover no-repeat;
             min-height: 100vh;
         }
 
@@ -271,23 +271,7 @@
                                                                     {{ $message }}</div>
                                                                 @enderror
                                                             </div>
-                                                        </div>
-
-                                                        {{-- <div class="form-check form-check-primary fs-16 py-2">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                name="remember" id="remember-check">
-                                                            <div class="float-end">
-                                                                <a href="{{ route('password.request"
-                                                                    class="text-muted text-decoration-underline fs-14">
-                                                                    Forgot your password?
-                                                                </a>
-                                                            </div>
-                                                            <label class="form-check-label fs-14" for="remember-check">
-                                                                Remember me
-                                                            </label>
-                                                        </div> --}}
-
-                                                        <!-- Cloudflare Turnstile Section -->
+                                                        </div>  
                                                          <div class="mb-4">
                                                             <!-- Hidden input to store the token -->
                                                             <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response">

@@ -1,9 +1,7 @@
 @extends('layouts.master')
 @section('title','VSR | Dashboard')
 @section('content')
-<!-- ============================================================== -->
-        <!-- Start right Content here -->
-        <!-- ============================================================== -->
+ {{-- @dd($user->first_name) --}}
         <div class="main-content">
 
             <div class="page-content">
@@ -51,7 +49,7 @@
                                             <div class="btn-group rounded" role="group" aria-label="Basic example">
                                                 <input type="hidden" id="referralLink" value="{{ route('register', ['sid' => session('user_name')]) }}" class="form-control" disabled >
                                                 <button type="button" class="btn btn-light fw-semibold rounded-start" id="copyBtn"><i class="mdi mdi-content-copy"></i>  Copy referal link</button> 
-                                                {{-- <button type="button" class="btn btn-primary rounded-end" ><span class="mdi mdi-content-copy"></span></button>  --}}
+                                                <button type="button" class="btn btn-success" id="shareBtn"><i class="mdi mdi-share-variant"></i> </button>
                                                 <a href="{{ route('register', ['sid' => session('user_name')]) }}" target="_blank" type="button" class="btn btn-primary rounded-end"><span class="mdi mdi-open-in-new"></span> </a> 
                                             </div>
                                         </div>
@@ -416,19 +414,41 @@
 
     @push('scripts')
         <script>
-            document.getElementById('copyBtn').addEventListener('click', function() {
-                const link = document.getElementById('referralLink').value;
-                navigator.clipboard.writeText(link).then(() => {
-                    showToast('Referal link copied successfully!', 'success');
-                    this.innerText = 'Copied!';
+            const referralLink = document.getElementById('referralLink').value;
+
+            document.getElementById('copyBtn').addEventListener('click', function () {
+                navigator.clipboard.writeText(referralLink).then(() => {
+                    showToast('Referral link copied successfully!', 'success');
+
+                    this.innerHTML = '<i class="mdi mdi-check"></i> Copied!';
                     setTimeout(() => {
-                        this.innerText = 'Copy referal link';
+                        this.innerHTML = '<i class="mdi mdi-content-copy"></i> Copy Referral Link';
                     }, 2000);
                 }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                    // alert('Failed to copy link.');
+                    console.error('Failed to copy:', err);
                     showToast('Failed to copy link!', 'danger');
                 });
+            });
+
+            document.getElementById('shareBtn').addEventListener('click', async function () {
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: 'Join using my referral link',
+                            text: 'Register using my referral link:',
+                            url: referralLink
+                        });
+                    } catch (err) {
+                        console.log('Share cancelled');
+                    }
+                } else {
+                    navigator.clipboard.writeText(referralLink).then(() => {
+                        showToast('Sharing is not supported. Referral link copied instead!', 'success');
+                    }).catch(err => {
+                        console.error('Failed to copy:', err);
+                        showToast('Failed to copy link!', 'danger');
+                    });
+                }
             });
         </script>
     @endpush
