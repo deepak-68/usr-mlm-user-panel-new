@@ -85,7 +85,7 @@ function loadData(type = 'all') {
                 data.data.forEach((item, index) => {
                     dataTable.row.add([
                         index + 1,
-                        item.user_id || '-',
+                        item.user_public_id || '-',
                         item.user_name || '-',
                         item.matching_cc || '0',
                         new Date(item.date).toLocaleDateString('en-GB'),

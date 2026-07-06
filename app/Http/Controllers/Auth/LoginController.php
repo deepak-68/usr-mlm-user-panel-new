@@ -46,7 +46,7 @@ class LoginController extends Controller
                 ->withInput();
         }
 
-        $response = Http::post($this->apiBaseUrl.'/login', [
+        $response = Http::timeout(10)->post($this->apiBaseUrl.'/login', [
             'username' => $request->username,
             'password' => $request->password,
         ]);
@@ -66,8 +66,10 @@ class LoginController extends Controller
         Session::put('token', $login['token']);
 
         if (isset($login['user'])) {
+            $userData = $login['user'];
 
-            Session::put('user', $login['user']);
+            Session::put('user', $userData);
+            // Session::put('user_id', $userData['public_id'] ?? $userData['id'] ?? null);
 
         } else {
             $me = Http::withToken($login['token'])
@@ -81,7 +83,9 @@ class LoginController extends Controller
                 ]);
             }
 
-            Session::put('user', $me->json()['user']);
+            $userData = $me->json()['user'];
+            Session::put('user', $userData);
+            // Session::put('user_id', $userData['public_id'] ?? $userData['id'] ?? null);
         }
 
         Session::put('logged_in', true);

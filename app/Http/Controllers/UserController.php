@@ -25,6 +25,7 @@ class UserController extends Controller
      
     public function editProfile()
     {
+        dd(Session::all());
         $token = Session::get('token');
 
         if (!$token) {
@@ -38,7 +39,6 @@ class UserController extends Controller
                 ->acceptJson()
                 ->timeout(10)
                 ->get($this->apiBaseUrl . '/profile');
-                // dd($response->json());   
 
             if ($response->unauthorized()) {
                 Session::flush();
@@ -55,11 +55,21 @@ class UserController extends Controller
                 ]);
 
                 return redirect()
-                    ->back()
+                    ->route('dashboard')
                     ->with('error', 'Unable to load your profile at the moment.');
             }
 
             $profile = $response->json();
+
+            if (!isset($profile['data'])) {
+                Log::error('Profile API returned invalid data', [
+                    'response' => $profile,
+                ]);
+
+                return redirect()
+                    ->route('dashboard')
+                    ->with('error', 'Invalid response from server.');
+            }
 
             return view('pages.edit-my-profile', [
                 'user' => $profile['data'],
@@ -73,7 +83,7 @@ class UserController extends Controller
             ]);
 
             return redirect()
-                ->back()
+                ->route('dashboard')
                 ->with('error', 'Something went wrong while loading your profile.');
         }
     }
@@ -81,7 +91,7 @@ class UserController extends Controller
     // Profile update
     public function updateProfile(Request $request)
     {
-        $userId = Session::get('user_id');
+        $userId = Session::get('user.id') ?? Session::get('user_id');
         $token = Session::get('token');
 
         if (!$userId) {
@@ -165,47 +175,69 @@ class UserController extends Controller
     // Profile image upload
     public function uploadProfileImage(Request $request)
     {
-        $userId = Session::get('user_id');
+        $userId = Session::get('user.id') ?? Session::get('user_id');
 
         if (!$userId) {
-            return redirect()->route('login')->with('error', 'Please login first.');
+            return response()->json(['status' => false, 'message' => 'Please login first.'], 401);
         }
 
-        $user = MlmUser::find($userId);
-
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'User not found.');
-        }
-
-        // ✅ Validation - Ab yeh kaam karega
         $validator = Validator::make($request->all(), [
             'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+            return response()->json(['status' => false, 'message' => 'Invalid file.'], 422);
         }
 
-        // Purani image delete karo
-        if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
-            Storage::disk('public')->delete($user->profile_photo_path);
-        }
-
-        // New image upload karo
-        if ($request->hasFile('profile_image')) {
+        try {
             $file = $request->file('profile_image');
-            $filename = time() . '_' . $user->id . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('profile-photos', $filename, 'public');
+            $response = Http::timeout(30)
+                ->asMultipart()
+                ->attach('profile_image', fopen($file->getRealPath(), 'r'), $file->getClientOriginalName())
+                ->post($this->apiBaseUrl . '/profile/update-image', [
+                    'user_id' => $userId,
+                ]);
 
-            $user->update([
-                'profile_photo_path' => $path,
-            ]);
+            if ($response->successful()) {
+                $body = $response->json();
 
-            return redirect()->route('user.profile.image')
-                ->with('success', 'Profile image updated successfully!');
+                // Refresh session user data from API
+                try {
+                    $profileRes = Http::withToken(Session::get('token'))
+                        ->acceptJson()
+                        ->timeout(10)
+                        ->get($this->apiBaseUrl . '/profile');
+
+                    if ($profileRes->successful()) {
+                        $profileData = $profileRes->json('data');
+                        if ($profileData) {
+                            Session::put('user', $profileData);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('Failed to refresh session after image upload', ['error' => $e->getMessage()]);
+                }
+
+                return response()->json([
+                    'status' => true,
+                    'message' => $body['message'] ?? 'Profile image updated successfully!',
+                    'image_url' => $body['image_url'] ?? null,
+                ]);
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update profile image.',
+            ], $response->status());
+
+        } catch (\Exception $e) {
+            Log::error('Profile image upload exception', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong. Please try again later.',
+            ], 500);
         }
-
-        return back()->with('error', 'No file uploaded.');
     }
       public function showChangePasswordForm()
     {

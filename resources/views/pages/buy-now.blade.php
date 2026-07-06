@@ -21,7 +21,8 @@
             @endif
             
 
-            <!-- Top Balance & Limit Card -->
+            @if(session('logged_in'))
+            <!-- Top Balance Card -->
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -32,17 +33,15 @@
                                     <h2 class="mb-0 text-primary">₹ {{ number_format($walletBalance, 2) }}</h2>
                                 </div>
                                 <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                                    <h6 class="text-muted text-uppercase mb-2">Products Purchased (Limit: {{ $maxProducts }})</h6>
-                                    <h2 class="mb-0 {{ $remainingProducts <= 5 ? 'text-danger' : 'text-success' }}">
-                                        {{ $totalPurchased }} / {{ $maxProducts }}
-                                    </h2>
-                                    <small class="text-muted">Remaining: {{ $remainingProducts }}</small>
+                                    <h6 class="text-muted text-uppercase mb-2">Total Products Purchased</h6>
+                                    <h2 class="mb-0 text-success">{{ $totalPurchased ?? 0 }}</h2>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            @endif
 
 
             <!-- Products List -->
@@ -52,66 +51,91 @@
                     $apiDomain = str_replace('/api', '', env('API_BASE_URL', 'http://127.0.0.1:8001'));
                 @endphp
 
+                {{-- @dump($products) --}}
+
                 @forelse($products as $product)
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card h-100">
                         <div class="card-body text-center">
-                            
-                            {{-- PRODUCT IMAGE LOGIC (Updated for Array) --}}
-                            @php
-                                $imgPath = '';
-                                if (!empty($product->images)) {
-                                    // API se images direct PHP Array mein aa raha hai
-                                    if (is_array($product->images) && isset($product->images[0])) {
-                                        $imgPath = $product->images[0];
-                                    } elseif (is_string($product->images)) {
-                                        // Fallback agar kabhi string format mein aaye
-                                        $decoded = json_decode($product->images, true);
-                                        $imgPath = (is_array($decoded) && isset($decoded[0])) ? $decoded[0] : $product->images;
-                                    }
-                                }
-                            @endphp
-
                             <div class="mb-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
-                                @if($imgPath)
-                                    {{-- Image API ke domain (8001) se load hogi --}}
-                                    <img src="{{ $apiDomain }}/storage/{{ $imgPath }}" alt="{{ $product->name }}" class="img-fluid rounded" style="max-height: 100%; object-fit: contain;">
-                                @else
-                                    <i class="las la-box fs-1 text-muted"></i>
-                                @endif
+                                <img src="{{ $product->image_url ?? '<i class="las la-box fs-1 text-muted"></i>' }}" alt="{{ $product->name }}" class="img-fluid rounded" style="max-height: 100%; object-fit: contain;">                                
                             </div>
 
                             <h5 class="card-title text-primary">{{ $product->name }}</h5>
                             <p class="text-muted small">{{ Str::limit($product->short_description ?? 'Product Description', 60) }}</p>
                             <span class="badge text-bg-primary">{{ Str::limit($product->category?->name ?? 'N/A', 60) }}</span>
                             
+                            @php
+                                $dp = $product->discount_price ?? $product->price;
+                                $gstRate = 6;
+
+                                // GST Amount (included in DP)
+                                $gstAmount = $dp * $gstRate / (100 + $gstRate);
+
+                                // Price excluding GST
+                                $unitPrice = $dp - $gstAmount;
+
+                                // Pack Size
+                                $packSize = $product->size ?? 1;
+
+                                // Selling price per unit
+                                $unitSellingPrice = $dp / $packSize;
+                            @endphp
+
                             <ul class="list-unstyled mb-3 text-start px-3">
-                                <li class="d-flex justify-content-between"><span><strong>MRP:</strong></span> <span>₹{{ number_format($product->price, 2) }}</span></li>
-                                <li class="d-flex justify-content-between"><span><strong>DP:</strong></span> <span>₹{{ number_format($product->discount_price ?? $product->price, 2) }}</span></li>
-                                <li class="d-flex justify-content-between"><span><strong>UNIT PRICE:</strong></span> <span>₹1380.95</span></li>
-                                <li class="d-flex justify-content-between"><span><strong>GST PRICE:</strong></span> <span>₹69.05</span></li>
-                                <li class="d-flex justify-content-between"><span><strong>PACK SIZE:</strong></span> <span>120</span></li>
-                                <li class="d-flex justify-content-between"><span><strong>UNIT SELLING PRICE:</strong></span> <span>₹15.74/Capsule</span></li>
-                                <li class="d-flex justify-content-between"><span><strong>CC:</strong></span> <span>{{ $product->cc_points ?? 0 }}</span></li>
-                                {{-- <li class="d-flex justify-content-between"><span><strong>Stock:</strong></span> <span class="badge bg-light text-dark">{{ $product->stock }}</span></li> --}}
+                                <li class="d-flex justify-content-between">
+                                    <span><strong>MRP:</strong></span>
+                                    <span class="text-decoration-line-through">
+                                        ₹{{ number_format($product->price, 2) }}
+                                    </span>
+                                </li>
+
+                                <li class="d-flex justify-content-between">
+                                    <span><strong>DP:</strong></span>
+                                    <span>₹{{ number_format($dp, 2) }}</span>
+                                </li>
+
+                                <li class="d-flex justify-content-between">
+                                    <span><strong>UNIT PRICE:</strong></span>
+                                    <span>₹{{ number_format($unitPrice, 2) }}</span>
+                                </li>
+
+                                <li class="d-flex justify-content-between">
+                                    <span><strong>GST PRICE (5%):</strong></span>
+                                    <span>₹{{ number_format($gstAmount, 2) }}</span>
+                                </li>
+
+                                <li class="d-flex justify-content-between">
+                                    <span><strong>PACK SIZE:</strong></span>
+                                    <span>{{ $packSize ?? 0 }} Capsule</span>
+                                </li>
+
+                                <li class="d-flex justify-content-between">
+                                    <span><strong>UNIT SELLING PRICE:</strong></span>
+                                    <span>₹{{ number_format($unitSellingPrice, 3) }}/Capsule</span>
+                                </li>
+
+                                <li class="d-flex justify-content-between">
+                                    <span><strong>CC:</strong></span>
+                                    <span>{{ $product->cc_points ?? 0 }}</span>
+                                </li>
                             </ul>
 
-                            @if($remainingProducts > 0 && $product->stock > 0)
+                            @if($product->stock > 0)
+                            @if(session('logged_in'))
                             <form class="purchase-form" action="#" method="POST" data-name="{{ $product->name }}" data-price="{{ $product->discount_price ?? $product->price }}">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <input type="hidden" name="user_id" value="{{ session('user_id') }}">
 
                                 <div class="mb-2">
-                                    <label class="form-label small text-start d-block">
-                                        Quantity (Max: {{ min($remainingProducts, $product->stock) }})
-                                    </label>
+                                    <label class="form-label small text-start d-block">Quantity</label>
                                     <input
                                         type="number"
                                         name="quantity"
                                         class="form-control form-control-sm"
                                         min="1"
-                                        max="{{ min($remainingProducts, $product->stock) }}"
+                                        max="{{ $product->stock }}"
                                         value="1"
                                         required
                                     >
@@ -122,9 +146,12 @@
                                 </button>
                             </form>
                             @else
-                            <button class="btn btn-secondary w-100" disabled>
-                                @if($remainingProducts <= 0) Limit Reached @else Out of Stock @endif
-                            </button>
+                            <a href="{{ route('login') }}" class="btn btn-primary w-100">
+                                Login to Purchase
+                            </a>
+                            @endif
+                            @else
+                            <button class="btn btn-secondary w-100" disabled>Out of Stock</button>
                             @endif
                         </div>
                     </div>

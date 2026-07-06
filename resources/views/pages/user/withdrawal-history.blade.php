@@ -5,81 +5,40 @@
 <div class="main-content">
     <div class="page-content">
         <div class="container-fluid">
-            
+
             <!-- Page Title -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="page-title-box shadow-sm border-0">
                         <h4 class="mb-0 fs-20">
-                            <i class="las la-history text-primary me-2"></i>WithdrawalHistory
+                            <i class="las la-history text-primary me-2"></i>Withdrawal History
                         </h4>
                     </div>
                 </div>
             </div>
 
-            <!-- Filters -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body p-0">
-                    {{-- <form method="GET" action="{{ route('user.fund-history') }}">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-3">
-                                <label class="form-label text-muted fw-medium">Type</label>
-                                <select name="type" class="form-select">
-                                    <option value="">All Types</option>
-                                    <option value="ADMIN CREDIT" {{ request('type') == 'ADMIN CREDIT' ? 'selected' : '' }}>ADMIN CREDIT</option>
-                                    <option value="ADMIN DEBIT" {{ request('type') == 'ADMIN DEBIT' ? 'selected' : '' }}>ADMIN DEBIT</option>
-                                    <option value="Credit Transfer" {{ request('type') == 'Credit Transfer' ? 'selected' : '' }}>Credit Transfer</option>
-                                    <option value="Debit Transfer" {{ request('type') == 'Debit Transfer' ? 'selected' : '' }}>Debit Transfer</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted fw-medium">Date From</label>
-                                <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted fw-medium">Date To</label>
-                                <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
-                            </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn w-100 text-white" style="background: #1e3a5f; border: none;">
-                                    <i class="las la-filter me-1"></i> Filter
-                                </button>
-                            </div>
-                        </div>
-                    </form> --}}
-                </div>
-            </div>
-
-
-            <!-- Fund History Table -->
+            <!-- Withdrawal History Table -->
             <div class="card shadow-sm border-0">
                 <div class="card-body p-3">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped table-hover align-middle mb-0" id="fundHistoryTable">
+                        <table class="table table-bordered table-striped table-hover align-middle mb-0" id="withdrawalTable">
                             <thead class="table-dark">
                                 <tr>
                                     <th class="text-center" style="width: 50px;">#</th>
-                                    <th>Sender</th>
-                                    <th>Sender UserName</th>
-                                    <th>Ammount</th>
-                                    <th>Remark</th>
+                                    <th>Request Date</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">Charges</th>
+                                    <th class="text-end">Payable</th>
                                     <th class="text-center">Status</th>
-                                    <th>Date</th>
+                                    <th>Transaction Number</th>
+                                    <th>Payment Date</th>
                                 </tr>
                             </thead>
-                            <tbody id="fundHistoryBody">
+                            <tbody id="withdrawalBody">
                                 <tr>
-                                    <td colspan="7" class="text-center">Loading...</td>
+                                    <td colspan="8" class="text-center">Loading...</td>
                                 </tr>
                             </tbody>
-
-                            {{-- <tfoot class="table-dark">
-                                <tr>
-                                    <td colspan="5" class="text-end fw-bold">Total</td>
-                                    <td class="text-center fw-bold text-success" id="totalCredit">₹0.00</td>
-                                    <td class="text-center fw-bold text-danger" id="totalDebit">₹0.00</td>
-                                </tr>
-                            </tfoot> --}}
                         </table>
                     </div>
                 </div>
@@ -92,125 +51,114 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 @endpush
 
 @push('scripts')
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 
 <script>
-// $(document).ready(function() {
-//     $('#fundHistoryTable').DataTable({
-//         responsive: true,
-//         pageLength: 10,
-//         order: [[1, 'desc']]
-//         language: {
-//             emptyTable: "No Fund History Found"
-//         }
-//     });
-// });
-
-
     document.addEventListener('DOMContentLoaded', function () {
-        Swal.fire({
-            title: 'Loading...',
-            text: 'Please wait',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
         const apiBaseUrl = "{{ config('services.api.base_url') }}";
         const userId = "{{ session('user_id') }}";
 
-        fetch(`${apiBaseUrl}/withdrawal-history?user_id=${encodeURIComponent(userId)}`)  
-            .then(response => response.json())
-            .then(data => {
+        if (!userId) {
+            document.getElementById('withdrawalBody').innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center text-danger">Session expired. Please login again.</td>
+                </tr>
+            `;
+            return;
+        }
 
-                let tbody = document.getElementById('fundHistoryBody');
-                tbody.innerHTML = '';
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Data loaded successfully',
-                    timer: 2000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
-
-                if (data.data.length > 0) {
-
-                    data.data.forEach((fund, index) => {
-
-                        tbody.innerHTML += `
-                            <tr>
-                                <td class="text-center fw-bold">${index + 1}</td>
-                                <td>${fund.user?.name ?? 'N/A'}</td>
-                                <td>${fund.sender_username ?? 'N/A'}</td>
-                                <td>₹${fund.amount ?? '0.00'}</td>
-                                <td>${fund.remark ?? '-'}</td>
-                                <td class="text-center">
-                                    <span class="badge bg-info text-dark">
-                                        ${fund.status ?? 'N/A'}
-                                    </span>
-                                </td>
-                                <td>${formatDate(fund.created_at)}</td>
-                            </tr>
-                        `;
-                    });
-
-                } else {
-
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="text-center py-5">
-                                No Fund History Found
-                            </td>
-                        </tr>
-                    `;
+        let table = $('#withdrawalTable').DataTable({
+            processing: true,
+            pageLength: 10,
+            dom: 'Bfrtip',
+            buttons: [{
+                extend: 'csvHtml5',
+                text: '<i class="las la-download me-1"></i> Export CSV',
+                className: 'btn btn-sm btn-outline-secondary',
+                title: 'Withdrawal_History',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7]
                 }
+            }],
+            order: [[1, 'desc']],
+            language: {
+                emptyTable: "No withdrawal history found",
+                processing: "Loading..."
+            },
+            columnDefs: [
+                { orderable: false, targets: [0] }
+            ],
+            columns: [
+                { data: 'serial' },
+                { data: 'created_at' },
+                { data: 'amount' },
+                { data: 'charges' },
+                { data: 'payable' },
+                { data: 'status' },
+                { data: 'transaction_number' },
+                { data: 'payment_date' }
+            ]
+        });
 
-                // Totals
-                // document.getElementById('totalCredit').innerText =
-                //     '₹' + parseFloat(data.totals.credit || 0).toFixed(2);
-
-                // document.getElementById('totalDebit').innerText =
-                //     '₹' + parseFloat(data.totals.debit || 0).toFixed(2);
-
+        fetch(`${apiBaseUrl}/withdrawal-history?user_id=${encodeURIComponent(userId)}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                if (data.data && data.data.length > 0) {
+                    let rows = data.data.map((item, index) => ({
+                        serial: index + 1,
+                        created_at: formatDate(item.created_at),
+                        amount: '₹' + parseFloat(item.amount || 0).toFixed(2),
+                        charges: '₹' + parseFloat(item.charges || 0).toFixed(2),
+                        payable: '₹' + parseFloat(item.payable || 0).toFixed(2),
+                        status: getStatusBadge(item.status),
+                        transaction_number: item.transaction_number || '-',
+                        payment_date: item.payment_date ? formatDate(item.payment_date) : '-'
+                    }));
+                    table.clear();
+                    table.rows.add(rows);
+                    table.draw();
+                } else {
+                    table.clear().draw();
+                }
             })
             .catch(error => {
                 console.error(error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to load data!',
-                    timer: 2000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
-
-                document.getElementById('fundHistoryBody').innerHTML = `
+                table.clear().draw();
+                $('#withdrawalTable tbody').html(`
                     <tr>
-                        <td colspan="7" class="text-center text-danger">
-                            Failed to load data
-                        </td>
+                        <td colspan="8" class="text-center text-danger">Failed to load data</td>
                     </tr>
-                `;
+                `);
             });
 
-        function formatDate(dateString) {
-            let date = new Date(dateString);
+        function getStatusBadge(status) {
+            let badgeClass = 'bg-secondary';
+            if (status === 'Pending') badgeClass = 'bg-warning text-dark';
+            else if (status === 'Approved') badgeClass = 'bg-success';
+            else if (status === 'Rejected') badgeClass = 'bg-danger';
+            else if (status === 'Paid') badgeClass = 'bg-info text-dark';
+            return `<span class="badge ${badgeClass}">${status || 'N/A'}</span>`;
+        }
 
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            let date = new Date(dateString);
+            if (isNaN(date.getTime())) return '-';
             let day = String(date.getDate()).padStart(2, '0');
             let month = String(date.getMonth() + 1).padStart(2, '0');
             let year = date.getFullYear();
-
             return `${day}-${month}-${year}`;
         }
-
     });
 </script>
 @endpush

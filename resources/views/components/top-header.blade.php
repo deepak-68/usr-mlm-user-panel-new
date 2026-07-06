@@ -30,11 +30,9 @@
                         <span></span>
                         <span></span>
                     </span>
-                </button>
+                </button> 
 
-            
-
-            </div>
+            </div>               
 
             <div class="d-flex align-items-center">
                 <div class="dropdown d-md-none topbar-head-dropdown header-item">
@@ -64,6 +62,14 @@
                     <button type="button" class="btn btn-icon btn-topbar btn-ghost-primary rounded-circle light-dark-mode">
                         <i class='las la-moon fs-24'></i>
                     </button>
+                </div>
+
+                <!-- Notification Bell -->
+                <div class="dropdown header-item">
+                    <a href="{{ route('user.notifications') }}" class="btn btn-icon btn-topbar btn-ghost-primary rounded-circle position-relative">
+                        <i class='las la-bell fs-24'></i>
+                        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px; display: none;">0</span>
+                    </a>
                 </div>
 
                 <div class="dropdown header-item">
@@ -99,3 +105,21 @@
         </div>
     </div>
 </header>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('{{ route("user.notifications.unread-count") }}', {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(json => {
+        const badge = document.getElementById('notificationBadge');
+        if (badge) {
+            const count = json.unread_count || 0;
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'inline' : 'none';
+        }
+    })
+    .catch(() => {});
+});
+</script>

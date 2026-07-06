@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -18,59 +16,65 @@ class ProductController extends Controller
         $this->apiBaseUrl = env('API_BASE_URL');
     }
 
-
     public function buyNow()
     {
-        $userId = Session::get('user_id');
-        
-        if (!$userId) {
-            return redirect()->route('login')->with('error', 'Please login first');
-        }
-
-        $maxProducts = 40;
-
-        $totalPurchased = DB::table('order_items')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->where('orders.user_id', $userId)
-            ->sum('order_items.quantity');
-
-        $remainingProducts = $maxProducts - $totalPurchased;
-
-        // Wallet Balance - wallet_id = 1 (Fund Wallet) ke liye
-        $walletBalance = DB::table('wallet_balances')
-            ->where('user_id', $userId)
-            ->where('wallet_id', 1)
-            ->value('balance');
-
-        $walletBalance = $walletBalance ?? 0;
-
-        // $products = DB::table('products')
-        //     ->where('status', 1)
-        //     ->where('in_stock', 1)
-        //     ->where('stock', '>', 0)
-        //     ->get();
-         $products = collect();
+        $userId = Session::get('user.id');
+        $token = Session::get('token');
+        $walletBalance = 0;
+        $totalPurchased = 0;
+        $products = collect();
 
         try {
+            $headers = $token ? ['Authorization' => 'Bearer ' . $token] : [];
             $response = Http::timeout(10)
+                ->withHeaders($headers)
                 ->get("{$this->apiBaseUrl}/products");
 
             if ($response->successful()) {
-                // Adjust according to your API response structure
-                // $products = $response->json('products') ?? $response->json();
-                $products = json_decode($response->body());
-                $products = $products->products;
+                $data = json_decode($response->body());
+                $products = $data->products ?? $data->data ?? $data ?? collect();
             }
         } catch (\Exception $e) {
             Log::error('Product API Error: ' . $e->getMessage());
         }
 
+        // Wallet & order history only for authenticated users
+        if ($userId && $token) {
+            try {
+                $walletResponse = Http::timeout(10)
+                    ->withHeaders(['Authorization' => 'Bearer ' . $token])
+                    ->get("{$this->apiBaseUrl}/fund-transfer/wallet-balance", [
+                        'user_id' => $userId
+                    ]);
+
+                if ($walletResponse->successful()) {
+                    $walletData = $walletResponse->json();
+                    $walletBalance = $walletData['balance'] ?? $walletData['data']['balance'] ?? 0;
+                }
+            } catch (\Exception $e) {
+                Log::error('Wallet Balance API Error: ' . $e->getMessage());
+            }
+
+            try {
+                $orderResponse = Http::timeout(10)
+                    ->withHeaders(['Authorization' => 'Bearer ' . $token])
+                    ->get("{$this->apiBaseUrl}/order-history", [
+                        'user_id' => $userId,
+                        'per_page' => 1
+                    ]);
+
+                if ($orderResponse->successful()) {
+                    $orderData = $orderResponse->json();
+                    $totalPurchased = $orderData['data']['total'] ?? $orderData['total'] ?? 0;
+                }
+            } catch (\Exception $e) {
+                Log::error('Order History API Error: ' . $e->getMessage());
+            }
+        }
 
         return view('pages.buy-now', compact(
             'products',
             'totalPurchased',
-            'maxProducts',
-            'remainingProducts',
             'walletBalance'
         ));
     }
@@ -78,111 +82,38 @@ class ProductController extends Controller
     public function purchase(Request $request)
     {
         $userId = Session::get('user_id');
-        
-        $validator = Validator::make($request->all(), [
-            'product_id' => 'required|exists:products,id',
+        $token = Session::get('token');
+
+        if (!$userId || !$token) {
+            return redirect()->route('login')->with('error', 'Please login first');
+        }
+
+        $request->validate([
+            'product_id' => 'required',
             'quantity' => 'required|integer|min:1',
         ]);
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        $productId = $request->input('product_id');
-        $quantity = $request->input('quantity');
-
-        $product = DB::table('products')->where('id', $productId)->first();
-
-        if (!$product || $product->stock < $quantity) {
-            return back()->with('error', 'Product not available or insufficient stock');
-        }
-
-        // Lifetime Limit Check
-        $totalPurchased = DB::table('order_items')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->where('orders.user_id', $userId)
-            ->sum('order_items.quantity');
-
-        $maxProducts = 40;
-        
-        if (($totalPurchased + $quantity) > $maxProducts) {
-            return back()->with('error', "You can only purchase maximum {$maxProducts} products. Already purchased: {$totalPurchased}. Remaining: " . ($maxProducts - $totalPurchased));
-        }
-
-        // Wallet Balance Check
-        $walletBalance = DB::table('wallet_balances')
-            ->where('user_id', $userId)
-            ->where('wallet_id', 1)
-            ->value('balance');
-        
-        $walletBalance = $walletBalance ?? 0;
-        $totalAmount = $product->price * $quantity;
-
-        if ($walletBalance < $totalAmount) {
-            return back()->with('error', "Insufficient wallet balance. Required: ₹{$totalAmount}, Available: ₹{$walletBalance}");
-        }
-
-        DB::beginTransaction();
-
         try {
-            // Order create karna - package_id ko NULL set karo
-            $orderId = DB::table('orders')->insertGetId([
-                'user_id' => $userId,
-                'package_id' => NULL, // NULL set karo kyunki yeh product order hai
-                'order_date' => now(),
-                'total_amount' => $totalAmount,
-                'total_cc_points' => ($product->cc_points ?? 0) * $quantity,
-                'status' => 'COMPLETED',
-                'order_type' => 'SELF',
-                'payment_mode' => 'WALLET',
-                'note' => "Purchased {$quantity}x {$product->name}",
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            // Order Item create karna
-            DB::table('order_items')->insert([
-                'order_id' => $orderId,
-                'product_id' => $productId,
-                'quantity' => $quantity,
-                'price' => $product->price,
-                'cc_points' => ($product->cc_points ?? 0) * $quantity,
-                'status' => 'COMPLETED',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            // Product stock update
-            DB::table('products')
-                ->where('id', $productId)
-                ->update(['stock' => $product->stock - $quantity]);
-
-            // Wallet se paise katna
-            DB::table('wallet_balances')
-                ->where('user_id', $userId)
-                ->where('wallet_id', 1)
-                ->update([
-                    'balance' => $walletBalance - $totalAmount,
-                    'total_withdrawn' => DB::raw('total_withdrawn + ' . $totalAmount),
-                    'updated_at' => now()
+            $response = Http::timeout(30)
+                ->withHeaders(['Authorization' => 'Bearer ' . $token])
+                ->post("{$this->apiBaseUrl}/purchase", [
+                    'user_id' => $userId,
+                    'product_id' => $request->product_id,
+                    'quantity' => $request->quantity,
                 ]);
 
-            // MLM Tree update
-            $ccPoints = ($product->cc_points ?? 0) * $quantity;
-            DB::table('mlm_trees')
-                ->where('mlm_user_id', $userId)
-                ->update([
-                    'business_volume' => DB::raw('business_volume + ' . $ccPoints),
-                    'earned_amount' => DB::raw('earned_amount + ' . $totalAmount),
-                    'updated_at' => now()
-                ]);
+            if ($response->successful()) {
+                $data = $response->json();
+                return redirect()->route('buy-now')
+                    ->with('success', $data['message'] ?? 'Order placed successfully!');
+            }
 
-            DB::commit();
-
-            return redirect()->route('buy-now')->with('success', 'Order placed successfully! Order ID: ' . $orderId);
+            $error = $response->json();
+            $message = $error['message'] ?? 'Purchase failed.';
+            return back()->with('error', $message)->withInput();
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            Log::error('Purchase API Error: ' . $e->getMessage());
             return back()->with('error', 'Error placing order: ' . $e->getMessage());
         }
     }

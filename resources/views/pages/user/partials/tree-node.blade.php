@@ -5,7 +5,7 @@
     $leftChild = $node->left ?? $node['left'] ?? null;
     $rightChild = $node->right ?? $node['right'] ?? null;
     
-    $userId = $user->user_id ?? $user->id ?? 0;
+    $userId = $user->user_public_id ?? $user->id ?? 0;
     $firstName = $user->first_name ?? 'User';
     $lastName = $user->last_name ?? '';
     $userName = $user->user_name ?? 'N/A';

@@ -47,6 +47,12 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('user.order-for-someone*') ? 'active' : '' }}" href="{{ route('user.order-for-someone') }}">
+                        <i class="las la-user-plus"></i> <span>Order for Someone</span>
+                    </a>
+                </li>
+
                 @php
                     $profileMenus = [
                         [
@@ -278,6 +284,16 @@
                             'route' => 'user.matching-income',
                             'icon' => 'las la-euro-sign',
                             'title' => 'Matching Income',
+                        ],
+                        [
+                            'route' => 'user.income-log',
+                            'icon' => 'las la-history',
+                            'title' => 'Referral Income Log',
+                        ],
+                        [
+                            'route' => 'user.notifications',
+                            'icon' => 'las la-bell',
+                            'title' => 'Notifications',
                         ],
                         // [
                         //     'route' => 'user.cash-bonus-request',
@@ -546,6 +562,11 @@
                             'route' => 'user.grievance.outbox',
                             'icon' => 'las la-paper-plane',
                             'title' => 'Outbox',
+                        ],
+                        [
+                            'route' => 'user.callback',
+                            'icon' => 'las la-phone',
+                            'title' => 'Schedule Callback',
                         ],
                     ];
 

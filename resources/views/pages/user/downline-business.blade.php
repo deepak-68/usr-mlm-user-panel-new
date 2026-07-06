@@ -187,13 +187,13 @@
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li>
                                                         <a class="dropdown-item" href="#" 
-                                                           onclick="viewTree({{ $member->mlm_user_id ?? 0 }}, '{{ $member->mlm_user->user_name ?? '' }}', 'genealogy'); return false;">
+                                                           onclick="viewTree({{ $member->user_public_id ?? 0 }}, '{{ $member->mlm_user->user_name ?? '' }}', 'genealogy'); return false;">
                                                             <i class="las la-sitemap me-2"></i> Genealogy Tree
                                                         </a>
                                                     </li>
                                                     <li>
                                                         <a class="dropdown-item" href="#" 
-                                                           onclick="viewTree({{ $member->mlm_user_id ?? 0 }}, '{{ $member->mlm_user->user_name ?? '' }}', 'referral'); return false;">
+                                                           onclick="viewTree({{ $member->user_public_id ?? 0 }}, '{{ $member->mlm_user->user_name ?? '' }}', 'referral'); return false;">
                                                             <i class="las la-project-diagram me-2"></i> Referral Tree
                                                         </a>
                                                     </li>

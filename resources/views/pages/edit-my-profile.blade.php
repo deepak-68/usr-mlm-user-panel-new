@@ -403,7 +403,7 @@
 @push('scripts')
     <script>
         const API_BASE_URL = "{{ config('services.api.base_url') }}";
-        const UPDATE_IMAGE_URL = `${API_BASE_URL}/update-image`; 
+        const UPDATE_IMAGE_URL = "{{ route('user.profile.image.upload') }}"; 
 
         function previewImage(input) {
             // if (input.files && input.files[0]) {
@@ -538,7 +538,7 @@
                     .html('<i class="las la-spinner la-spin me-2"></i>Uploading...');
 
                 $.ajax({
-                    url: `${API_BASE_URL}/profile/update-image`,
+                    url: UPDATE_IMAGE_URL,
                     type: "POST",
                     data: formData,
                     headers: {

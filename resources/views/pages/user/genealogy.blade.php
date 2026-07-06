@@ -485,7 +485,7 @@
                 // },
 
                 innerHTML: `
-                    <div class="custom-node text-center" data-user-id="${node.user_id}">
+                    <div class="custom-node text-center" data-user-id="${node.user_public_id}">
 
                         <div class="user-avatar avatar-blue mb-2 border mx-auto">
                             ${

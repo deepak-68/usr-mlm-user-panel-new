@@ -200,6 +200,27 @@
                                                             </div>
                                                         </div>
 
+                                                        <div class="mt-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="privacy_policy" id="privacy_policy" required>
+                                                                <label class="form-check-label" for="privacy_policy">
+                                                                    I have read and agree to the
+                                                                    <a href="{{ route('privacy-policy') }}" target="_blank">Privacy Policy</a>
+                                                                    <span class="text-danger">*</span>
+                                                                </label>
+                                                                <div class="invalid-feedback" id="privacy_policy_error"></div>
+                                                            </div>
+                                                            <div class="form-check mt-2">
+                                                                <input class="form-check-input" type="checkbox" name="terms_accepted" id="terms_accepted" required>
+                                                                <label class="form-check-label" for="terms_accepted">
+                                                                    I have read and accept the
+                                                                    <a href="{{ route('terms-conditions') }}" target="_blank">Terms & Conditions</a>
+                                                                    <span class="text-danger">*</span>
+                                                                </label>
+                                                                <div class="invalid-feedback" id="terms_accepted_error"></div>
+                                                            </div>
+                                                        </div>
+
                                                         <div class="mt-4">
                                                             <button class="btn btn-primary w-100" type="submit" id="registerBtn">
                                                                 <span id="btnText">Create Account</span>
@@ -322,6 +343,15 @@
                 if (!confirmPassword) { setError('password_confirmation', 'Please confirm your password.'); valid = false; }
                 else if (password !== confirmPassword) { setError('password_confirmation', 'Passwords do not match.'); valid = false; }
 
+                if (!$('#privacy_policy').is(':checked')) {
+                    $('#privacy_policy_error').text('You must accept the Privacy Policy.');
+                    valid = false;
+                }
+                if (!$('#terms_accepted').is(':checked')) {
+                    $('#terms_accepted_error').text('You must accept the Terms & Conditions.');
+                    valid = false;
+                }
+
                 if (!valid) return;
 
                 $('#btnText').text('Please wait...');
@@ -348,7 +378,9 @@
                         country: country,
                         pincode: pincode,
                         password: password,
-                        password_confirmation: confirmPassword
+                        password_confirmation: confirmPassword,
+                        privacy_policy_accepted: $('#privacy_policy').is(':checked') ? 1 : 0,
+                        terms_accepted: $('#terms_accepted').is(':checked') ? 1 : 0
                     },
                     success: function(res) {
                         console.log(res);
@@ -396,6 +428,8 @@
                             if (errs.country)
                                 $('[name="country"]').addClass('is-invalid');
 
+                            if (errs.privacy_policy_accepted) $('#privacy_policy_error').text(errs.privacy_policy_accepted[0]);
+                            if (errs.terms_accepted) $('#terms_accepted_error').text(errs.terms_accepted[0]);
                             if (errs.pincode)
                                 $('[name="pincode"]').addClass('is-invalid');
                         }

@@ -25,6 +25,18 @@
                     </div>
                     {{-- @dump(session()->all()) --}}
                     <!-- end page title -->
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
                     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
                         <div id="mainToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
                             <div class="d-flex">
@@ -42,7 +54,10 @@
                                     <div class="d-flex align-items-center flex-wrap gap-3">
                                         <div class="flex-grow-1">
                                             <h4 class="mb-2 text-white">Welcome Back, {{ $user->first_name }} {{ $user->last_name }}!</h4>
-                                            <p class="mb-0"> <strong>Track ID: </strong> <span class="badge text-bg-success">{{ $user->track_id }}</span> | <strong>Membership: </strong> <span class="badge text-bg-success">{{ ucwords(str_replace('_', ' ', $user->membership_type)) }}</span></p>
+                                            <p class="mb-3"> <strong>Track ID: </strong> <span class="badge text-bg-success">{{ $user->track_id }}</span> | <strong>Membership: </strong> <span class="badge text-bg-success">{{ ucwords(str_replace('_', ' ', $user->membership_type)) }}</span></p>
+
+                                            <div class="datetime  fw-semibold fs-5 bg-white rounded text-dark d-inline px-2" id="datetime"></div>
+                                             
                                         </div>
                                         <div class="flex-shrink-0">
                                             {{-- <i class="las la-user-circle" style="font-size: 60px;"></i> --}}
@@ -51,6 +66,8 @@
                                                 <button type="button" class="btn btn-light fw-semibold rounded-start" id="copyBtn"><i class="mdi mdi-content-copy"></i>  Copy referal link</button> 
                                                 <button type="button" class="btn btn-success" id="shareBtn"><i class="mdi mdi-share-variant"></i> </button>
                                                 <a href="{{ route('register', ['sid' => session('user_name')]) }}" target="_blank" type="button" class="btn btn-primary rounded-end"><span class="mdi mdi-open-in-new"></span> </a> 
+
+                                                
                                             </div>
                                         </div>
                                     </div>
@@ -59,15 +76,69 @@
                         </div>
                     </div>
 
-                    <!-- Stats Cards -->
-                    <div class="row">
+                    <!-- Section: Income KPIs (7 Types) -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5 class="mb-3"><i class="las la-chart-pie me-1"></i> Income Overview</h5>
+                        </div>
+                        @php
+                            $kpis = $income_kpis ?? [];
+                            $icons = [
+                                'retail_income' => 'las la-store',
+                                'direct_income' => 'las la-hand-holding-usd',
+                                'matching_income' => 'las la-exchange-alt',
+                                'level_income' => 'las la-layer-group',
+                                'reward_tour_income' => 'las la-gift',
+                                'repurchase_income' => 'las la-shopping-cart',
+                                'rank_income' => 'las la-trophy',
+                            ];
+                            $colors = [
+                                'retail_income' => 'primary',
+                                'direct_income' => 'success',
+                                'matching_income' => 'info',
+                                'level_income' => 'warning',
+                                'reward_tour_income' => 'danger',
+                                'repurchase_income' => 'secondary',
+                                'rank_income' => 'dark',
+                            ];
+                        @endphp
+                        @foreach($kpis as $key => $kpi)
+                        <div class="col-xl-3 col-md-6 col-12 mb-3">
+                            <div class="card kpi-card kpi-{{ $colors[$key] ?? 'income' }} shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start justify-content-between mb-2">
+                                        <p class="kpi-label mb-0">{{ $kpi->label ?? '' }}</p>
+                                        <div class="kpi-icon badge bg-{{ $colors[$key] ?? 'primary' }} text-white">
+                                            <i class="{{ $icons[$key] ?? 'las la-wallet' }}"></i>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-baseline">
+                                        <div>
+                                            <span class="badge bg-light text-dark me-1" title="Current CC">{{ number_format($kpi->current_cc, 2) }} CC</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <h5 class="mb-0 text-{{ $colors[$key] ?? 'primary' }}">₹{{ number_format($kpi->current_amount, 2) }}</h5>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Lifetime: {{ number_format($kpi->lifetime_total, 2) }} CC</small>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Section: Account Summary -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5 class="mb-3"><i class="las la-user-circle me-1"></i> Account Summary</h5>
+                        </div>
                         <div class="col-xl-3 col-md-4 col-12 mb-3">
                             <div class="card kpi-card kpi-rank shadow-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <p class="kpi-label">Highest Rank</p>
-                                            <h4 class="kpi-value">{{ $userRank }}</h4>
+                                            <p class="kpi-label">Current Rank</p>
+                                            <h4 class="kpi-value">{{ $user_rank ?? 'Fresh' }}</h4>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <div class="kpi-icon">
@@ -78,32 +149,13 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-xl-3 col-md-4 col-12 mb-3">
-                            <div class="card kpi-card kpi-income shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <p class="kpi-label">Current Income</p>
-                                            <h4 class="kpi-value">₹{{ number_format($totalIncome, 2) }}</h4>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="kpi-icon">
-                                                <i class="las la-wallet"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="col-xl-3 col-md-4 col-12 mb-3">
                             <div class="card kpi-card kpi-business shadow-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
                                             <p class="kpi-label">Self CC</p>
-                                            <h4 class="kpi-value">{{ number_format($selfCC, 2) }}</h4>
+                                            <h4 class="kpi-value">{{ number_format($self_cc ?? 0, 2) }}</h4>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <div class="kpi-icon">
@@ -114,50 +166,13 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-xl-3 col-md-4 col-12 mb-3">
-                            <div class="card kpi-card kpi-percent shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <p class="kpi-label">Dual Matching Income</p>
-                                            <h4 class="kpi-value">16%</h4>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="kpi-icon">
-                                                <i class="las la-percentage"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-4 col-12 mb-3">
-                            <div class="card kpi-card kpi-income shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <p class="kpi-label">Direct Income</p>
-                                            <h4 class="kpi-value">₹{{ number_format($directIncome, 2) }}</h4>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="kpi-icon">
-                                                <i class="las la-hand-holding-usd"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="col-xl-3 col-md-4 col-12 mb-3">
                             <div class="card kpi-card kpi-wallet shadow-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
                                             <p class="kpi-label">Fund Wallet</p>
-                                            <h4 class="kpi-value">₹{{ number_format($fundWallet, 2) }}</h4>
+                                            <h4 class="kpi-value">₹{{ number_format($fund_wallet ?? 0, 2) }}</h4>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <div class="kpi-icon">
@@ -168,38 +183,19 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-xl-3 col-md-4 col-12 mb-3">
-                            <div class="card kpi-card kpi-income shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <p class="kpi-label">Matching Income</p>
-                                            <h4 class="kpi-value">₹{{ number_format($matchingIncome, 2) }}</h4>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="kpi-icon">
-                                                <i class="las la-exchange-alt"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="col-xl-3 col-md-4 col-12 mb-3">
                             <div class="card kpi-card kpi-balance shadow-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <p class="kpi-label">Current Left CC / Right CC</p>
+                                            <p class="kpi-label">Left CC | Right CC</p>
                                             <div class="kpi-dual">
                                                 <span class="chip chip-left">
-                                                    <i class="las la-arrow-left"></i> {{ number_format($currentLeftCC, 0) }}
+                                                    <i class="las la-arrow-left"></i> {{ number_format($current_left_cc ?? 0, 0) }}
                                                 </span>
                                                 <span class="chip-divider">|</span>
                                                 <span class="chip chip-right">
-                                                    <i class="las la-arrow-right"></i> {{ number_format($currentRightCC, 0) }}
+                                                    <i class="las la-arrow-right"></i> {{ number_format($current_right_cc ?? 0, 0) }}
                                                 </span>
                                             </div>
                                         </div>
@@ -212,14 +208,13 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-xl-3 col-md-4 col-12 mb-3">
                             <div class="card kpi-card kpi-team shadow-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
                                             <p class="kpi-label">Total Directs</p>
-                                            <h4 class="kpi-value">{{ $directBusiness }}</h4>
+                                            <h4 class="kpi-value">{{ $direct_business ?? 0 }}</h4>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <div class="kpi-icon">
@@ -230,20 +225,19 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-xl-3 col-md-4 col-12 mb-3">
                             <div class="card kpi-card kpi-team shadow-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <p class="kpi-label">Active Downline Left | Right</p>
+                                            <p class="kpi-label">Active Downline L | R</p>
                                             <div class="kpi-dual">
                                                 <span class="chip chip-left">
-                                                    <i class="las la-arrow-left"></i> {{ $leftTeam }}
+                                                    <i class="las la-arrow-left"></i> {{ $left_team ?? 0 }}
                                                 </span>
                                                 <span class="chip-divider">|</span>
                                                 <span class="chip chip-right">
-                                                    <i class="las la-arrow-right"></i> {{ $rightTeam }}
+                                                    <i class="las la-arrow-right"></i> {{ $right_team ?? 0 }}
                                                 </span>
                                             </div>
                                         </div>
@@ -256,76 +250,13 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-xl-3 col-md-4 col-12 mb-3">
-                            <div class="card kpi-card kpi-team shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <p class="kpi-label">Total Downline Left | Right</p>
-                                            <div class="kpi-dual">
-                                                <span class="chip chip-left">
-                                                    <i class="las la-arrow-left"></i> {{ $totalDownlineLeft }}
-                                                </span>
-                                                <span class="chip-divider">|</span>
-                                                <span class="chip chip-right">
-                                                    <i class="las la-arrow-right"></i> {{ $totalDownlineRight }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="kpi-icon">
-                                                <i class="las la-network-wired"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-4 col-12 mb-3">
-                            <div class="card kpi-card kpi-business shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <p class="kpi-label">Total Direct Business</p>
-                                            <h4 class="kpi-value">₹{{ number_format($totalDirectBusiness, 2) }}</h4>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="kpi-icon">
-                                                <i class="las la-chart-line"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-4 col-12 mb-3">
-                            <div class="card kpi-card kpi-generation shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <p class="kpi-label">Total Generation Income</p>
-                                            <h4 class="kpi-value">₹{{ number_format($generationIncome, 2) }}</h4>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="kpi-icon">
-                                                <i class="las la-layer-group"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="col-xl-3 col-md-4 col-12 mb-3">
                             <div class="card kpi-card kpi-total shadow-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <p class="kpi-label">Total Income</p>
-                                            <h4 class="kpi-value">₹{{ number_format($totalIncome, 2) }}</h4>
+                                            <p class="kpi-label">Total Income (CC)</p>
+                                            <h4 class="kpi-value">{{ number_format($total_income_cc ?? 0, 2) }}</h4>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <div class="kpi-icon">
@@ -336,6 +267,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
                     <!-- Order History -->
@@ -360,7 +292,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @forelse($orderHistory as $index => $order)
+                                                @forelse($order_history as $index => $order)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>{{ $order->id ?? 'N/A' }}</td>
@@ -450,5 +382,30 @@
                     });
                 }
             });
+
+
+            function updateDateTime() {
+                const now = new Date();
+
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+
+                hours = hours % 12;
+                hours = hours ? hours : 12; // 0 becomes 12
+                hours = String(hours).padStart(2, '0');
+
+                document.getElementById("datetime").textContent =
+                    `${day}-${month}-${year} ${hours}:${minutes}:${seconds} ${ampm}`;
+            }
+
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
         </script>
     @endpush
