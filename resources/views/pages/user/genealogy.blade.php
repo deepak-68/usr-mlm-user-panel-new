@@ -642,7 +642,7 @@
             modal.show();
 
             // Fetch modal content
-            fetch(`/team-genealogy/user/${userId}/modal`)
+            fetch(`{{ url('/user-profile') }}/${userId}/modal`)
                 .then(res => {
                     if (!res.ok) {
                         throw new Error('HTTP ' + res.status);

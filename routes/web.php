@@ -45,23 +45,11 @@ Route::get('/register', function () {
 })->name('register');
 
 Route::get('/privacy-policy', function () {
-    try {
-        $response = Http::timeout(10)->get(env('API_BASE_URL') . '/privacy-policy');
-        $content = $response->successful() ? ($response->json()['data']['content'] ?? '') : '';
-    } catch (\Exception $e) {
-        $content = '';
-    }
-    return view('pages.content-page', compact('content'))->with('title', 'Privacy Policy');
+    return redirect(route('register'));
 })->name('privacy-policy');
 
 Route::get('/terms-conditions', function () {
-    try {
-        $response = Http::timeout(10)->get(env('API_BASE_URL') . '/terms-conditions');
-        $content = $response->successful() ? ($response->json()['data']['content'] ?? '') : '';
-    } catch (\Exception $e) {
-        $content = '';
-    }
-    return view('pages.content-page', compact('content'))->with('title', 'Terms & Conditions');
+    return redirect(route('register'));
 })->name('terms-conditions');
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -83,14 +71,11 @@ Route::middleware('auth.mlm')->group(function () {
     Route::post('/profile-image/upload', [UserController::class, 'uploadProfileImage'])->name('user.profile.image.upload');
     Route::get('/change-password', [UserController::class, 'showChangePasswordForm'])->name('user.change-password');
     Route::post('/change-password', [UserController::class, 'changePassword'])->name('user.change-password.update');
-    Route::get('/change-transaction-password', [UserController::class, 'showChangeTransactionPasswordForm'])->name('user.change-transaction-password');
-    Route::post('/change-transaction-password', [UserController::class, 'changeTransactionPassword'])->name('user.change-transaction-password.update');
-    Route::get('/forgot-transaction-password', [UserController::class, 'showForgotTransactionPasswordForm'])->name('user.forgot-transaction-password');
-    Route::post('/forgot-transaction-password', [UserController::class, 'forgotTransactionPassword'])->name('user.forgot-transaction-password.submit');
     Route::get('/user-registration', function () {
         return view('pages.user.registration');
     })->name('user.registration');
     Route::get('/welcome-letter', [UserController::class, 'welcomeLetter'])->name('user.welcome-letter');
+    Route::get('/cards', [UserController::class, 'cards'])->name('user.cards');
     Route::get('/visiting-card', [UserController::class, 'visitingCard'])->name('user.visiting-card');
     Route::post('/visiting-card/download', [UserController::class, 'downloadVisitingCard'])->name('user.visiting-card.download');
     Route::get('/signup-acknowledgement', [UserController::class, 'signupAcknowledgement'])->name('user.signup-acknowledgement');
@@ -99,8 +84,11 @@ Route::middleware('auth.mlm')->group(function () {
     Route::get('/direct-business', [UserMLMController::class, 'directBusiness'])->name('user.direct-business');
     Route::get('/downline-business', [UserMLMController::class, 'downlineBusiness'])->name('user.downline-business');
     Route::get('/genealogy', [UserMLMController::class, 'genealogy'])->name('user.genealogy');
+    Route::get('/pending-placement', [UserMLMController::class, 'pendingPlacement'])->name('user.pending-placement');
+    Route::post('/pending-placement/place', [UserMLMController::class, 'pendingPlacementPlace'])->name('user.pending-placement.place');
     Route::get('/user-profile/{userId}/modal', [UserMLMController::class, 'getUserProfileModal'])->name('user.profile.modal');
-    Route::get('/user-tree/{userId}/html', [UserMLMController::class, 'getUserTreeHtml'])->name('user.tree.html');
+    Route::get('/user-tree/{userId}/html', [UserMLMController::class, 'getUserTree'])->name('user.tree.html');
+    Route::get('/user-referrals/{userId}', [UserMLMController::class, 'getReferralList'])->name('user.referral.list');
 
     // Bank / Fund
     Route::get('/admin-bank-detail', [UserBankDetailController::class, 'index'])->name('user.admin-bank-detail');

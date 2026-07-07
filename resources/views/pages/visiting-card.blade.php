@@ -6,9 +6,9 @@
 <div class="main-content">
     <div class="page-content">
         <div class="container-fluid">
-            
+
             <!-- Download Button -->
-            <div class="row mb-4">
+            <div class="row mb-4 no-print">
                 <div class="col-12 text-end">
                     <button onclick="downloadCard()" class="btn btn-success me-2">
                         <i class="las la-download me-2"></i>Download
@@ -18,61 +18,46 @@
                     </button>
                 </div>
             </div>
- 
+
             <!-- Visiting Card -->
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-md-10">
-                    <div class="visiting-card-container" id="visitingCard">
-                        
-                        <!-- Card Design -->
+                    <div id="visitingCard">
                         <div class="visiting-card">
+                            <!-- Left Panel: Brand -->
                             <div class="card-left">
-                                <!-- Logo -->
-                                <div class="logo-section">
-                                    <img src="{{ asset('assets/images/logo.webp') }}" alt="VSR MLM NETWORK Wellness" class="company-logo">
-                                    <div class="company-name">
-                                        <h3>VSR MLM NETWORK</h3>
-                                        <p class="wellness-text">WELLNESS</p>
-                                        <p class="tagline">Heaven of Wellness</p>
+                                <div class="brand-content">
+                                    <div class="logo-wrapper">
+                                        <img src="{{ asset('assets/images/logo.webp') }}"
+                                             alt="VSR MLM NETWORK"
+                                             class="company-logo"
+                                             onerror="this.style.display='none'">
                                     </div>
+                                    <div class="brand-name">VSR MLM NETWORK</div>
+                                    <div class="brand-sub">WELLNESS</div>
+                                    <div class="brand-tagline">Heaven of Wellness</div>
                                 </div>
                             </div>
-                            
+
+                            <!-- Right Panel: User Info -->
                             <div class="card-right">
-                                <!-- User Name -->
-                                <div class="user-name-section">
-                                    <h2>{{ strtoupper($user->first_name . ' ' . $user->last_name) }}</h2>
+                                <div class="user-name">{{ strtoupper($user->first_name . ' ' . $user->last_name) }}</div>
+                                <div class="user-title">Independent Nutritionist &amp; Dietician Consultant</div>
+                                <div class="divider"></div>
+                                <div class="info-row">
+                                    <span class="info-icon"><i class="las la-phone"></i></span>
+                                    <span class="info-text">+91-{{ $user->phone }}</span>
                                 </div>
-
-                                <!-- Contact Info -->
-                                <div class="contact-info">
-                                    <div class="contact-item">
-                                        <i class="las la-phone"></i>
-                                        <span>+91-{{ $user->phone }}</span>
-                                    </div>
-                                    <div class="contact-item">
-                                        <i class="las la-envelope"></i>
-                                        <span>{{ $user->email }}</span>
-                                    </div>
+                                <div class="info-row">
+                                    <span class="info-icon"><i class="las la-envelope"></i></span>
+                                    <span class="info-text">{{ $user->email }}</span>
                                 </div>
-
-                                <!-- Position -->
-                                <div class="position-section">
-                                    <p>Independent Nutritionist And Dietician Consultant Of VSR MLM NETWORK Wellness Pvt.Ltd.</p>
-                                </div>
-
-                                <!-- Website -->
-                                <div class="website-section">
-                                    <i class="las la-globe"></i>
-                                    <span>www.VSR MLM NETWORKwellness.com</span>
+                                <div class="info-row">
+                                    <span class="info-icon"><i class="las la-globe"></i></span>
+                                    <span class="info-text">www.vsrmlmnetworkwellness.com</span>
                                 </div>
                             </div>
-
-                            <!-- Decorative Elements -->
-                            <div class="decoration decoration-top-right"></div>
-                            <div class="decoration decoration-bottom-left"></div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -81,242 +66,170 @@
     </div>
 </div>
 
-<!-- Styles -->
 <style>
-.visiting-card-container {
+#visitingCard {
     padding: 20px;
-    background: #f5f5f5;
-    border-radius: 10px;
 }
 
 .visiting-card {
-    width: 100%;
-    max-width: 700px;
-    height: 400px;
-    background: white;
-    margin: 0 auto;
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
     display: flex;
+    width: 100%;
+    max-width: 600px;
+    height: 320px;
+    margin: 0 auto;
+    border-radius: 12px;
     overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     position: relative;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
 }
 
+/* ── Left Panel ── */
 .card-left {
-    width: 35%;
-    background: var(--in-vertical-menu-item-active-bgcolor);
-    padding: 30px;
+    width: 32%;
+    background: var(--in-vertical-menu-item-active-bgcolor, #1e3a8a);
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
+    padding: 20px 15px;
 }
 
-.logo-section {
+.brand-content {
     text-align: center;
-    color: white;
+    color: #fff;
+}
+
+.logo-wrapper {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
 .company-logo {
-    width: 120px;
-    height: 100px;
-    margin-bottom: 15px;
-    /* filter: brightness(0) invert(1); */
-    object-fit: none
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
-.company-name h3 {
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    margin: 0;
+.brand-name {
+    font-size: 18px;
+    font-weight: 800;
     letter-spacing: 1px;
+    line-height: 1.2;
+    margin-bottom: 2px;
 }
 
-.wellness-text {
-    color: white;
-    font-size: 14px;
-    letter-spacing: 3px;
-    margin: 5px 0;
+.brand-sub {
+    font-size: 11px;
+    letter-spacing: 4px;
     text-transform: uppercase;
+    opacity: 0.9;
+    margin-bottom: 6px;
 }
 
-.tagline {
-    color: rgba(255,255,255,0.9);
-    font-size: 12px;
+.brand-tagline {
+    font-size: 11px;
     font-style: italic;
-    margin: 10px 0 0 0;
+    opacity: 0.8;
 }
 
+/* ── Right Panel ── */
 .card-right {
-    width: 65%;
-    padding: 40px;
+    width: 68%;
+    padding: 28px 30px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    position: relative;
+    background: #fff;
 }
 
-.user-name-section h2 {
-    color: #1e3a8a;
-    font-size: 32px;
+.user-name {
+    font-size: 22px;
     font-weight: 700;
-    margin: 0 0 30px 0;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-}
-
-.contact-info {
-    margin-bottom: 25px;
-}
-
-.contact-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-    color: #333;
-    font-size: 14px;
-}
-
-.contact-item i {
-    width: 30px;
-    height: 30px;
-    background: var(--in-vertical-menu-item-active-bgcolor);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 12px;
-    font-size: 14px;
-}
-
-.contact-item span {
-    color: #555;
-}
-
-.position-section {
-    margin: 25px 0;
-}
-
-.position-section p {
-    color: #666;
-    font-size: 12px;
-    line-height: 1.6;
-    margin: 0;
-    text-align: justify;
-}
-
-.website-section {
-    display: flex;
-    align-items: center;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e0e0e0;
-}
-
-.website-section i {
-    width: 25px;
-    height: 25px;
-    background: var(--in-vertical-menu-item-active-bgcolor);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px;
-    font-size: 12px;
-}
-
-.website-section span {
     color: #1e3a8a;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.user-title {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+.divider {
+    height: 2px;
+    width: 50px;
+    background: var(--in-vertical-menu-item-active-bgcolor, #1e3a8a);
+    margin-bottom: 14px;
+    border-radius: 2px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.info-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--in-vertical-menu-item-active-bgcolor, #1e3a8a);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 13px;
-    font-weight: 500;
+    flex-shrink: 0;
 }
 
-/* Decorative Elements */
-.decoration {
-    position: absolute;
-    opacity: 0.1;
+.info-text {
+    font-size: 12px;
+    color: #555;
+    word-break: break-all;
 }
 
-.decoration-top-right {
-    top: -50px;
-    right: -50px;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-.decoration-bottom-left {
-    bottom: -50px;
-    left: -50px;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, #1e3a8a 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-/* Print Styles */
+/* ── Print ── */
 @media print {
-    body * {
-        visibility: hidden;
-    }
-    
-    #visitingCard, #visitingCard * {
-        visibility: visible;
-    }
-    
+    body * { visibility: hidden; }
+    #visitingCard, #visitingCard * { visibility: visible; }
     #visitingCard {
         position: absolute;
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
-        width: 100%;
-        max-width: 700px;
     }
-    
-    .no-print {
-        display: none !important;
-    }
-    
-    @page {
-        size: landscape;
-        margin: 10mm;
-    }
+    .no-print { display: none !important; }
+    @page { size: landscape; margin: 10mm; }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ── Responsive ── */
+@media (max-width: 576px) {
     .visiting-card {
         flex-direction: column;
         height: auto;
+        max-width: 340px;
     }
-    
-    .card-left, .card-right {
-        width: 100%;
-    }
-    
-    .card-left {
-        padding: 20px;
-    }
-    
-    .card-right {
-        padding: 30px;
-    }
-    
-    .user-name-section h2 {
-        font-size: 24px;
-    }
+    .card-left, .card-right { width: 100%; }
+    .card-left { padding: 24px 15px; }
+    .card-right { padding: 24px 20px; }
+    .logo-wrapper { width: 80px; height: 80px; }
+    .brand-name { font-size: 16px; }
+    .user-name { font-size: 18px; }
 }
 </style>
 
 <script>
 function downloadCard() {
-    // HTML2Canvas library use karo agar installed hai
-    // Ya fir print dialog khol do
     window.print();
 }
 </script>

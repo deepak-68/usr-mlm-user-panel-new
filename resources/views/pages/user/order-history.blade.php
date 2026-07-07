@@ -123,7 +123,7 @@
                                     </td>
                                     <td class="text-center">
                                         @if($order->invoice ?? false)
-                                            <a href="{{ url('/invoice/' . $order->invoice->public_id . '/download') }}"
+                                            <a href="{{ route('invoice.download', ['publicId' => $order->invoice->id]) }}"
                                                class="btn btn-sm btn-primary"
                                                target="_blank">
                                                 <i class="las la-download"></i>

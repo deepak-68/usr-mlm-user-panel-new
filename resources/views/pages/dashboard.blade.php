@@ -62,10 +62,10 @@
                                         <div class="flex-shrink-0">
                                             {{-- <i class="las la-user-circle" style="font-size: 60px;"></i> --}}
                                             <div class="btn-group rounded" role="group" aria-label="Basic example">
-                                                <input type="hidden" id="referralLink" value="{{ route('register', ['sid' => session('user_name')]) }}" class="form-control" disabled >
+                                                <input type="hidden" id="referralLink" value="{{ route('register', ['sid' => $user->user_name]) }}" class="form-control" disabled >
                                                 <button type="button" class="btn btn-light fw-semibold rounded-start" id="copyBtn"><i class="mdi mdi-content-copy"></i>  Copy referal link</button> 
                                                 <button type="button" class="btn btn-success" id="shareBtn"><i class="mdi mdi-share-variant"></i> </button>
-                                                <a href="{{ route('register', ['sid' => session('user_name')]) }}" target="_blank" type="button" class="btn btn-primary rounded-end"><span class="mdi mdi-open-in-new"></span> </a> 
+                                                <a href="{{ route('register', ['sid' => $user->user_name]) }}" target="_blank" type="button" class="btn btn-primary rounded-end"><span class="mdi mdi-open-in-new"></span> </a> 
 
                                                 
                                             </div>
@@ -283,11 +283,12 @@
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>Order ID</th>
+                                                    <th>Order Number</th>
                                                     <th>Customer</th>
                                                     <th>Order Date</th>
-                                                    <th>Delivery Type</th>
-                                                    <th>Payment Status</th>
+                                                    <th>Type</th>
+                                                    <th>Status</th>
+                                                    <th>Amount</th>
                                                     <th>Invoice</th>
                                                 </tr>
                                             </thead>
@@ -295,22 +296,42 @@
                                                 @forelse($order_history as $index => $order)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $order->id ?? 'N/A' }}</td>
-                                                    <td>{{ $user->user_name }}</td>
-                                                    <td>{{ date('d-m-Y', strtotime($order->created_at)) }}</td>
-                                                    <td>{{ $order->delivery_type ?? 'By Courier' }}</td>
+                                                    <td>{{ $order->order_number ?? 'ORD-' . str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</td>
                                                     <td>
-                                                        <span class="badge bg-success-subtle text-success">
-                                                            {{ $order->payment_status ?? 'Approve' }}
-                                                        </span>
+                                                        @if(!empty($order->purchased_for_user_id) && $order->purchased_for_user_id != $order->user_id && !empty($order->purchased_for_user))
+                                                            {{ $order->purchased_for_user->user_name ?? 'User #'.$order->purchased_for_user_id }}
+                                                        @else
+                                                            {{ $user->user_name }}
+                                                        @endif
                                                     </td>
+                                                    <td>{{ \Carbon\Carbon::parse($order->order_date ?? $order->created_at)->format('d-m-Y') }}</td>
+                                                    <td>{{ $order->order_type ?? 'SELF' }}</td>
                                                     <td>
-                                                        <button class="btn btn-sm btn-primary">Invoice</button>
+                                                        @if(($order->status ?? '') === 'COMPLETED')
+                                                            <span class="badge bg-success"><i class="las la-check-circle me-1"></i>Completed</span>
+                                                        @elseif(($order->status ?? '') === 'CONFIRMED')
+                                                            <span class="badge bg-info"><i class="las la-check me-1"></i>Confirmed</span>
+                                                        @elseif(($order->status ?? '') === 'PENDING')
+                                                            <span class="badge bg-warning text-dark"><i class="las la-clock me-1"></i>Pending</span>
+                                                        @else
+                                                            <span class="badge bg-danger"><i class="las la-times-circle me-1"></i>{{ $order->status ?? 'N/A' }}</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="fw-bold">₹{{ number_format($order->total_amount ?? 0, 2) }}</td>
+                                                    <td>
+                                                        @if(!empty($order->invoice))
+                                                            <a href="{{ route('invoice.download', ['publicId' => $order->invoice->id]) }}"
+                                                               class="btn btn-sm btn-primary" target="_blank">
+                                                                <i class="las la-download"></i>
+                                                            </a>
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                                 @empty
                                                 <tr>
-                                                    <td colspan="7" class="text-center text-muted">No orders found</td>
+                                                    <td colspan="8" class="text-center text-muted">No orders found</td>
                                                 </tr>
                                                 @endforelse
                                             </tbody>
@@ -401,8 +422,8 @@
                 hours = hours ? hours : 12; // 0 becomes 12
                 hours = String(hours).padStart(2, '0');
 
-                document.getElementById("datetime").textContent =
-                    `${day}-${month}-${year} ${hours}:${minutes}:${seconds} ${ampm}`;
+                document.getElementById("datetime").innerHTML =
+                `<span class="mdi mdi-clock-time-nine-outline"></span> ${day}-${month}-${year} ${hours}:${minutes}:${seconds} ${ampm}`;
             }
 
             updateDateTime();

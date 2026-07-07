@@ -25,7 +25,6 @@ class UserController extends Controller
      
     public function editProfile()
     {
-        dd(Session::all());
         $token = Session::get('token');
 
         if (!$token) {
@@ -191,12 +190,18 @@ class UserController extends Controller
 
         try {
             $file = $request->file('profile_image');
-            $response = Http::timeout(30)
+            $response = Http::withToken(Session::get('token'))
+                ->timeout(30)
                 ->asMultipart()
                 ->attach('profile_image', fopen($file->getRealPath(), 'r'), $file->getClientOriginalName())
                 ->post($this->apiBaseUrl . '/profile/update-image', [
                     'user_id' => $userId,
                 ]);
+
+            if ($response->unauthorized()) {
+                Session::flush();
+                return response()->json(['status' => false, 'message' => 'Session expired. Please login again.'], 401);
+            }
 
             if ($response->successful()) {
                 $body = $response->json();
@@ -460,49 +465,74 @@ class UserController extends Controller
     }
     public function welcomeLetter()
 {
-    $userId = Session::get('user_id');
+    $userData = Session::get('user');
 
-    if (!$userId) {
+    if (!$userData) {
         return redirect()->route('login')->with('error', 'Please login first.');
     }
 
-    $user = MlmUser::with(['sponsor'])->find($userId);
-
-    if (!$user) {
-        return redirect()->route('login')->with('error', 'User not found.');
-    }
+    $user = (object) $userData;
 
     return view('pages.welcome-letter', compact('user'));
 }
 public function visitingCard()
 {
-    $userId = Session::get('user_id');
+    $userData = Session::get('user');
 
-    if (!$userId) {
+    if (!$userData) {
         return redirect()->route('login')->with('error', 'Please login first.');
     }
 
-    $user = MlmUser::find($userId);
-
-    if (!$user) {
-        return redirect()->route('login')->with('error', 'User not found.');
-    }
+    $user = (object) $userData;
 
     return view('pages.visiting-card', compact('user'));
+}
+
+// Common page for ID Card + Visiting Card
+public function cards()
+{
+    $userData = Session::get('user');
+
+    if (!$userData) {
+        return redirect()->route('login')->with('error', 'Please login first.');
+    }
+
+    $user = (object) $userData;
+
+    $profileImage = !empty($userData['profile_image'])
+        ? $userData['profile_image']
+        : null;
+
+    // Convert profile image to base64 server-side so html2canvas can render it without CORS issues
+    if ($profileImage && filter_var($profileImage, FILTER_VALIDATE_URL)) {
+        try {
+            $response = Http::timeout(5)->get($profileImage);
+            if ($response->successful()) {
+                $contentType = $response->header('Content-Type') ?: 'image/jpeg';
+                $profileImage = 'data:' . $contentType . ';base64,' . base64_encode($response->body());
+            }
+        } catch (\Exception $e) {
+            // Fall back to original URL
+            Log::warning('Failed to fetch profile image for cards: ' . $e->getMessage());
+        }
+    }
+
+    return view('pages.cards', compact('user', 'profileImage'));
 }
 
 // Visiting Card download karna
 public function downloadVisitingCard(Request $request)
 {
-    $userId = Session::get('user_id');
-    $user = MlmUser::find($userId);
+    $userData = Session::get('user');
 
-    if (!$user) {
-        return redirect()->route('login')->with('error', 'User not found.');
+    if (!$userData) {
+        return redirect()->route('login')->with('error', 'Please login first.');
     }
 
+    $user = (object) $userData;
+
     // HTML content ko capture karo
-    $html = view('pages.visiting-card-download', compact('user'))->render();
+    $html = view('pages.visiting-card', compact('user'))->render();
     
     // PDF generate karne ke liye (agar snappy/pdf library use kar rahe ho)
     // Ya fir screenshot download ka option de sakte ho
@@ -513,16 +543,22 @@ public function downloadVisitingCard(Request $request)
 }
 public function signupAcknowledgement()
 {
-    $userId = Session::get('user_id');
+    $userData = Session::get('user');
 
-    if (!$userId) {
+    if (!$userData) {
         return redirect()->route('login')->with('error', 'Please login first.');
     }
 
-    $user = MlmUser::with(['sponsor'])->find($userId);
+    $token = Session::get('token');
 
-    if (!$user) {
-        return redirect()->route('login')->with('error', 'User not found.');
+    $response = Http::withToken($token)
+        ->get($this->apiBaseUrl . '/profile');
+
+    if ($response->successful()) {
+        $data = $response->json();
+        $user = json_decode(json_encode($data['data']));
+    } else {
+        $user = (object) $userData;
     }
 
     return view('pages.signup-acknowledgement', compact('user'));

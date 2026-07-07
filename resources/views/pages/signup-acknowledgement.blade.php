@@ -10,13 +10,19 @@
             <!-- Action Buttons -->
             <div class="row mb-4 no-print">
                 <div class="col-12 text-end">
-                    <button onclick="window.print()" class="btn btn-primary me-2">
-                        <i class="las la-print me-2"></i>Print
-                    </button>
-                    <button onclick="downloadPDF()" class="btn btn-success me-2">
-                        <i class="las la-download me-2"></i>Download
-                    </button>
-                    <a href="{{ route('dashboard') }}" class="btn btn-secondary">
+                    <div class="btn-group" role="group">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="las la-download me-1"></i>Download
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item" onclick="downloadImage()"><i class="las la-image me-2"></i>As Image</button></li>
+                                <li><button class="dropdown-item" onclick="downloadPdf()"><i class="las la-file-pdf me-2"></i>As PDF</button></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-primary" onclick="printCard()" title="Print"><i class="las la-print me-2"></i>Print</button>
+                    </div>
+                    <a href="{{ route('dashboard') }}" class="btn btn-secondary ms-2">
                         <i class="las la-arrow-left me-2"></i>Back to Dashboard
                     </a>
                 </div>
@@ -61,9 +67,9 @@
                     <div class="details-grid">
                         <div class="detail-row">
                             <span class="label">Sponsor GW:</span>
-                            <span class="value">{{ $user->sponsor->user_name ?? 'N/A' }}</span>
+                            <span class="value">{{ data_get($user, 'sponsor.user_name') ?? 'N/A' }}</span>
                             <span class="label">Sponsor Name:</span>
-                            <span class="value">{{ $user->sponsor->first_name ?? '' }} {{ $user->sponsor->last_name ?? '' }}</span>
+                            <span class="value">{{ trim(data_get($user, 'sponsor.first_name', '') . ' ' . data_get($user, 'sponsor.last_name', '')) ?: 'N/A' }}</span>
                         </div>
                     </div>
                 </div>
@@ -81,8 +87,8 @@
                         <div class="detail-row">
                             <span class="label">Password:</span>
                             <span class="value password-text">TOP1234</span>
-                            <span class="label"></span>
-                            <span class="value"></span>
+                            <span class="label">Membership Type:</span>
+                            <span class="value">{{ $user->membership_type ?? 'N/A' }}</span>
                         </div>
                     </div>
                 </div>
@@ -95,7 +101,25 @@
                             <span class="label">Name:</span>
                             <span class="value">{{ $user->first_name ?? '' }} {{ $user->last_name ?? '' }}</span>
                             <span class="label">Birth Date:</span>
-                            <span class="value">{{ $user->dob ?? 'N/A' }}</span>
+                            <span class="value">{{ $user->detail->date_of_birth ?? 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Gender:</span>
+                            <span class="value">{{ ucfirst($user->detail->gender ?? 'N/A') }}</span>
+                            <span class="label">Father Name:</span>
+                            <span class="value">{{ $user->detail->father_name ?? 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Mother Name:</span>
+                            <span class="value">{{ $user->detail->mother_name ?? 'N/A' }}</span>
+                            <span class="label">PAN Number:</span>
+                            <span class="value">{{ $user->detail->pan_number ?? 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Aadhaar Number:</span>
+                            <span class="value">{{ $user->detail->aadhaar_number ?? 'N/A' }}</span>
+                            <span class="label"></span>
+                            <span class="value"></span>
                         </div>
                     </div>
                 </div>
@@ -106,27 +130,33 @@
                     <div class="details-grid">
                         <div class="detail-row">
                             <span class="label">Address:</span>
-                            <span class="value">{{ $user->address ?? 'N/A' }}</span>
+                            <span class="value">{{ trim(($user->detail->address_line_1 ?? '') . ' ' . ($user->detail->address_line_2 ?? '')) ?: 'N/A' }}</span>
                             <span class="label"></span>
                             <span class="value"></span>
                         </div>
                         <div class="detail-row">
                             <span class="label">City:</span>
-                            <span class="value">{{ $user->district ?? 'N/A' }}</span>
+                            <span class="value">{{ $user->detail->city ?? 'N/A' }}</span>
                             <span class="label">District:</span>
-                            <span class="value">{{ $user->district ?? 'N/A' }}</span>
+                            <span class="value">{{ $user->detail->district ?? 'N/A' }}</span>
                         </div>
                         <div class="detail-row">
                             <span class="label">State:</span>
-                            <span class="value">{{ $user->state ?? 'N/A' }}</span>
-                            <span class="label">Pincode:</span>
-                            <span class="value">{{ $user->pincode ?? 'N/A' }}</span>
+                            <span class="value">{{ $user->detail->state ?? 'N/A' }}</span>
+                            <span class="label">Country:</span>
+                            <span class="value">{{ $user->detail->country ?? 'N/A' }}</span>
                         </div>
                         <div class="detail-row">
+                            <span class="label">Pincode:</span>
+                            <span class="value">{{ $user->detail->pincode ?? 'N/A' }}</span>
                             <span class="label">Mobile No:</span>
                             <span class="value">{{ $user->phone ?? 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row">
                             <span class="label">Email:</span>
                             <span class="value">{{ $user->email ?? 'N/A' }}</span>
+                            <span class="label"></span>
+                            <span class="value"></span>
                         </div>
                     </div>
                 </div>
@@ -137,9 +167,9 @@
                     <div class="details-grid">
                         <div class="detail-row">
                             <span class="label">Name:</span>
-                            <span class="value">{{ $user->nominee_name ?? 'N/A' }}</span>
+                            <span class="value">{{ $user->detail->nominee_name ?? 'N/A' }}</span>
                             <span class="label">Relation:</span>
-                            <span class="value">{{ $user->nominee_relation ?? 'N/A' }}</span>
+                            <span class="value">{{ $user->detail->nominee_relation ?? 'N/A' }}</span>
                         </div>
                         <div class="detail-row">
                             <span class="label">Birth Date:</span>
@@ -245,6 +275,7 @@
     margin: 0 auto;
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
     border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.08);
 }
 
 .company-header {
@@ -443,11 +474,11 @@
         visibility: hidden;
     }
     
-    #acknowledgementDocument, #acknowledgementDocument * {
+    #print-card, #print-card * {
         visibility: visible;
     }
     
-    #acknowledgementDocument {
+    #print-card {
         position: absolute;
         left: 0;
         top: 0;
@@ -465,12 +496,57 @@
 }
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-function downloadPDF() {
-  
-    window.print();
-    
-  
+const userName = '{{ $user->user_name }}';
+
+function printCard() {
+    const el = document.getElementById('acknowledgementDocument');
+    const rect = el.getBoundingClientRect();
+    const clone = el.cloneNode(true);
+    clone.id = 'print-card';
+    clone.style.width = rect.width + 'px';
+    clone.style.flexShrink = '0';
+    document.body.appendChild(clone);
+    setTimeout(function() {
+        window.print();
+        setTimeout(function() {
+            document.getElementById('print-card')?.remove();
+        }, 300);
+    }, 200);
+}
+
+const h2cOpts = { scale: 2, useCORS: true, backgroundColor: null };
+
+function downloadImage() {
+    const el = document.getElementById('acknowledgementDocument');
+    html2canvas(el, h2cOpts).then(function(canvas) {
+        const link = document.createElement('a');
+        link.download = 'signup-acknowledgement-' + userName + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+}
+
+function downloadPdf() {
+    const el = document.getElementById('acknowledgementDocument');
+    const origMaxW = el.style.maxWidth;
+    const origMargin = el.style.margin;
+    el.style.maxWidth = 'none';
+    el.style.margin = '0';
+    html2canvas(el, h2cOpts).then(function(canvas) {
+        el.style.maxWidth = origMaxW;
+        el.style.margin = origMargin;
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pw = 210, ph = 297, m = 3;
+        const pw2 = pw - m * 2;
+        const ph2 = pw2 * canvas.height / canvas.width;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        pdf.addImage(imgData, 'PNG', m, ph2 > ph - m * 2 ? m : (ph - ph2) / 2, pw2, ph2 > ph - m * 2 ? ph - m * 2 : ph2);
+        pdf.save('signup-acknowledgement-' + userName + '.pdf');
+    });
 }
 </script>
 @endsection

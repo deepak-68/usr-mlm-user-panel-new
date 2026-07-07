@@ -47,11 +47,11 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ request()->routeIs('user.order-for-someone*') ? 'active' : '' }}" href="{{ route('user.order-for-someone') }}">
+                {{-- <li class="nav-item">
+                    <a class="nav-link menu-link" href="{{ route('buy-now') }}">
                         <i class="las la-user-plus"></i> <span>Order for Someone</span>
                     </a>
-                </li>
+                </li> --}}
 
                 @php
                     $profileMenus = [
@@ -71,27 +71,17 @@
                         //     'title' => 'Change Password',
                         // ],
                         [
-                            'route' => 'user.change-transaction-password',
-                            'icon' => 'las la-lock',
-                            'title' => 'Change Tran. Password',
-                        ],
-                        [
-                            'route' => 'user.forgot-transaction-password',
-                            'icon' => 'las la-unlock-alt',
-                            'title' => 'Forgot Tran. Password',
-                        ],
-                        [
                             'route' => 'user.welcome-letter',
                             'icon' => 'las la-envelope-open-text',
                             'title' => 'Welcome Letter',
                         ],
                         [
-                            'route' => '#',
+                            'route' => 'user.cards',
                             'icon' => 'las la-id-badge',
                             'title' => 'ID Card',
                         ],
                         [
-                            'route' => 'user.visiting-card',
+                            'route' => 'user.cards',
                             'icon' => 'las la-address-card',
                             'title' => 'Visiting Card',
                         ],
@@ -154,6 +144,11 @@
                             'route' => 'user.genealogy',
                             'icon' => 'las la-sitemap',
                             'title' => 'Genealogy',
+                        ],
+                        [
+                            'route' => 'user.pending-placement',
+                            'icon' => 'las la-hourglass-half',
+                            'title' => 'Pending Placement',
                         ],
                     ];
 

@@ -65,13 +65,6 @@
 
 <div class="d-flex gap-2 mt-3">
     <button class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Close</button>
-    
-    <button type="button" 
-            class="btn flex-fill text-white" 
-            onclick="loadUserTree({{ $user->id ?? 0 }})" 
-            style="background: #1e3a5f; border: none;">
-        <i class="las la-sitemap me-1"></i> Show Downline
-    </button>
 </div>
 </div>
 @else

@@ -22,17 +22,18 @@ class DownlineRankController extends Controller
 
     public function getDownlineRankData(Request $request)
     {
-        $userId = session('user_id');
-        
+        $userId = session('user.id');
+
         if (!$userId) {
             return response()->json(['success' => false, 'message' => 'Please login first'], 401);
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/downline-rank", [
-                'user_id' => $userId,
-                'type' => $request->type ?? 'all',
-            ]);
+            $response = Http::withToken(session('token'))->timeout(10)
+                ->get("{$this->apiBaseUrl}/downline-rank", [
+                    'user_id' => $userId,
+                    'type' => $request->type ?? 'all',
+                ]);
 
             return $response->successful() 
                 ? response()->json($response->json())

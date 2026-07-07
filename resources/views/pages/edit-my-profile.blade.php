@@ -254,7 +254,7 @@
                                 <div class="col-md-4 text-center mb-3 mb-md-0">
                                     <div class="border p-2 rounded" style="max-width: 200px;">
                                         @if(!empty($user['detail']['profile_image']))
-                                            <img src="{{ $user['detail']['profile_image'] }}"
+                                            <img src="{{ $user['detail']['profile_image'] . '?v=' . time() }}"
                                                 alt="Profile Image"
                                                 class="img-fluid rounded"
                                                 id="currentImage"
@@ -554,12 +554,12 @@
 
                             showToast('Profile image updated successfully!', 'success');
 
-                            // if (response.image_url) {
-                            //     $('#currentImage').attr('src', response.image_url);
-                            // }
+                            if (response.image_url) {
+                                $('#currentImage').attr('src', response.image_url + '?t=' + Date.now());
+                            }
 
-                            // $('#newImagePreview').hide();
-                            // $('#profile_image').val('');
+                            $('#newImagePreview').hide();
+                            $('#profile_image').val('');
 
                             setTimeout(() => {
                                 window.location.reload();

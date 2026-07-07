@@ -23,6 +23,7 @@ class ProductController extends Controller
         $walletBalance = 0;
         $totalPurchased = 0;
         $products = collect();
+        $bankDetails = collect();
 
         try {
             $headers = $token ? ['Authorization' => 'Bearer ' . $token] : [];
@@ -72,10 +73,25 @@ class ProductController extends Controller
             }
         }
 
+        // Bank details for manual payment
+        try {
+            $bankResponse = Http::timeout(10)
+                ->withHeaders($headers)
+                ->get("{$this->apiBaseUrl}/admin-bank-details");
+
+            if ($bankResponse->successful()) {
+                $bankData = $bankResponse->json();
+                $bankDetails = collect($bankData['data'] ?? [])->map(fn($item) => (object) $item);
+            }
+        } catch (\Exception $e) {
+            Log::error('Bank Details API Error: ' . $e->getMessage());
+        }
+
         return view('pages.buy-now', compact(
             'products',
             'totalPurchased',
-            'walletBalance'
+            'walletBalance',
+            'bankDetails'
         ));
     }
 
