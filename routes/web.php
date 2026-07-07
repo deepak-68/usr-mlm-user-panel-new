@@ -7,14 +7,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\User\UserMLMController;
-use App\Http\Controllers\User\UserBankDetailController;
 use App\Http\Controllers\User\FundSummaryController;
 use App\Http\Controllers\User\FundRequestController;
 use App\Http\Controllers\User\FundRequestStatusController;
 use App\Http\Controllers\User\FundTransferController;
 use App\Http\Controllers\User\FundHistoryController;
-use App\Http\Controllers\User\WalletController;
-use App\Http\Controllers\User\DirectIncomeController;
+use App\Http\Controllers\User\WalletController;use App\Http\Controllers\User\DirectIncomeController;
 use App\Http\Controllers\User\MatchingIncomeController;
 use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\User\CashBonusRequestController;
@@ -35,6 +33,7 @@ use App\Http\Controllers\User\GrievanceController;
 use App\Http\Controllers\User\IncomeController;
 use App\Http\Controllers\User\KycController;
 use App\Http\Controllers\User\OrderForSomeoneController;
+use App\Http\Controllers\User\BankDetailController;
 use App\Http\Controllers\User\CallbackController;
 
 // ── Public Routes ─────────────────────────────────────────────────
@@ -91,7 +90,7 @@ Route::middleware('auth.mlm')->group(function () {
     Route::get('/user-referrals/{userId}', [UserMLMController::class, 'getReferralList'])->name('user.referral.list');
 
     // Bank / Fund
-    Route::get('/admin-bank-detail', [UserBankDetailController::class, 'index'])->name('user.admin-bank-detail');
+    Route::get('/wallet', [WalletController::class, 'index'])->name('user.wallet');
     Route::get('/fund-summary', [FundSummaryController::class, 'index'])->name('user.fund-summary');
     Route::get('/fund-request', [FundRequestController::class, 'index'])->name('user.fund-request');
     Route::get('/api/fund-request/bank-details', [FundRequestController::class, 'getBankDetails'])->name('user.fund-request.bank-details');
@@ -105,7 +104,6 @@ Route::middleware('auth.mlm')->group(function () {
     Route::get('/fund-history', [FundHistoryController::class, 'index'])->name('user.fund-history');
 
     // Wallet
-    Route::get('/wallets', [WalletController::class, 'index'])->name('user.wallets');
     Route::get('/wallet/transactions', [WalletController::class, 'getTransactions'])->name('user.wallet.transactions');
     Route::get('/account-summary', [WalletController::class, 'accountSummary'])->name('user.account.summary');
     Route::get('/account-summary/data', [WalletController::class, 'getAccountSummaryData'])->name('user.account.summary.data');
@@ -174,6 +172,8 @@ Route::middleware('auth.mlm')->group(function () {
     Route::post('/grievance/submit', [GrievanceController::class, 'submitTicket'])->name('user.grievance.submit');
     Route::get('/grievance/outbox', [GrievanceController::class, 'outbox'])->name('user.grievance.outbox');
     Route::get('/grievance/outbox/data', [GrievanceController::class, 'getOutboxData'])->name('user.grievance.outbox.data');
+    Route::get('/grievance/ticket-messages/{id}', [GrievanceController::class, 'getTicketMessages'])->name('user.grievance.ticket-messages');
+    Route::post('/grievance/reply-ticket', [GrievanceController::class, 'replyTicket'])->name('user.grievance.reply-ticket');
     Route::get('/grievance/inbox', [GrievanceController::class, 'inbox'])->name('user.grievance.inbox');
     Route::get('/grievance/inbox/data', [GrievanceController::class, 'getInboxData'])->name('user.grievance.inbox.data');
 
@@ -183,6 +183,10 @@ Route::middleware('auth.mlm')->group(function () {
 
     // Withdrawal
     Route::get('/withdrawal-history', [FundHistoryController::class, 'withdrawalHistory'])->name('withdrawal.history');
+
+    // Bank Details (User's own bank account for receiving payouts)
+    Route::get('/bank-detail', [BankDetailController::class, 'show'])->name('user.bank-detail.show');
+    Route::post('/bank-detail/save', [BankDetailController::class, 'save'])->name('user.bank-detail.save');
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('user.notifications');

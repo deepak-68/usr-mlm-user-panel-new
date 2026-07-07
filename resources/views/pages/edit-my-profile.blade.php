@@ -357,43 +357,53 @@
                     
                 </div>
             </div>
+        </div>
 
-
-
-               
-
-                <!-- BANK DETAIL -->
-                {{-- <div class="card mb-4">
-                    <div class="card-header"><h5 class="mb-0">BANK DETAIL</h5></div>
+        <!-- Row: Bank Detail -->
+        <div class="row mt-3">
+            <div class="col-md-6" id="bankDetailSection">
+                <div class="card mb-4">
+                    <div class="card-header"><h5 class="mb-0"><i class="las la-university me-2"></i>BANK DETAIL (For Receiving Payouts)</h5></div>
                     <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Bank Name</label>
-                                <input type="text" name="bank_name" class="form-control" value="{{ old('bank_name', $user->bank_name) }}">
+                        <form id="bankDetailForm" enctype="multipart/form-data">
+                            @csrf
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Account Holder Name</label>
+                                    <input type="text" name="account_holder_name" class="form-control" placeholder="Account Holder Name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Bank Name</label>
+                                    <input type="text" name="bank_name" class="form-control" placeholder="Bank Name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Account Number</label>
+                                    <input type="text" name="account_number" class="form-control" placeholder="Account Number" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">IFSC Code</label>
+                                    <input type="text" name="ifsc_code" class="form-control" placeholder="IFSC Code" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Bank Attachment (Cheque / Passbook)</label>
+                                    <input type="file" name="bank_attachment" class="form-control" accept="image/jpeg,image/jpg,image/png,image/gif" id="bankAttachmentInput">
+                                    <small class="text-muted">Allowed: JPG, JPEG, PNG, GIF (Max 2MB)</small>
+                                    <div id="existingAttachment" class="mt-2" style="display:none;">
+                                        <img src="" alt="Bank Attachment" class="img-thumbnail" style="max-width: 200px; max-height: 120px; object-fit: contain;" id="bankAttachmentPreview">
+                                        <p class="text-muted small mt-1">Current attachment. Upload a new file to replace.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <button type="submit" id="saveBankDetailBtn" class="btn btn-primary w-100">
+                                        <i class="las la-save me-2"></i>Save Bank Details
+                                    </button>
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Branch Name</label>
-                                <input type="text" name="branch_name" class="form-control" value="{{ old('branch_name', $user->branch_name) }}">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Account Type</label>
-                                <input type="text" name="account_type" class="form-control" value="{{ old('account_type', $user->account_type) }}">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Account Number</label>
-                                <input type="text" name="account_number" class="form-control" value="{{ old('account_number', $user->account_number) }}">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Account Holder Name</label>
-                                <input type="text" name="account_holder_name" class="form-control" value="{{ old('account_holder_name', $user->account_holder_name) }}">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">IFSC Code</label>
-                                <input type="text" name="ifsc_code" class="form-control" value="{{ old('ifsc_code', $user->ifsc_code) }}">
-                            </div>
-                        </div>
+                        </form>
                     </div>
-                </div> --}}
+                </div>
+            </div>
+        </div>
 
                  
         </div>
@@ -420,6 +430,72 @@
         }
 
         $(document).ready(function () {
+
+            // ── Load existing bank detail ──
+            function loadBankDetail() {
+                $.ajax({
+                    url: '{{ route("user.bank-detail.show") }}',
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    success: function (res) {
+                        if (res.success && res.data) {
+                            var bd = res.data;
+                            $('input[name="account_holder_name"]').val(bd.account_holder_name || '');
+                            $('input[name="bank_name"]').val(bd.bank_name || '');
+                            $('input[name="account_number"]').val(bd.account_number || '');
+                            $('input[name="ifsc_code"]').val(bd.ifsc_code || '');
+                            if (bd.bank_attachment) {
+                                var imgUrl = API_BASE_URL + '/storage/' + bd.bank_attachment;
+                                $('#bankAttachmentPreview').attr('src', imgUrl);
+                                $('#existingAttachment').show();
+                            }
+                        }
+                    }
+                });
+            }
+            loadBankDetail();
+
+            // ── Save bank detail ──
+            $('#bankDetailForm').on('submit', function (e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                var btn = $('#saveBankDetailBtn');
+                btn.prop('disabled', true).html('<i class="las la-spinner la-spin me-2"></i>Saving...');
+
+                $.ajax({
+                    url: '{{ route("user.bank-detail.save") }}',
+                    method: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                        'Accept': 'application/json',
+                    },
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        if (res.success) {
+                            showToast(res.message || 'Bank details saved successfully!', 'success');
+                            loadBankDetail();
+                        } else {
+                            showToast(res.message || 'Something went wrong.', 'error');
+                        }
+                    },
+                    error: function (xhr) {
+                        var msg = 'Server error occurred.';
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var firstKey = Object.keys(errors)[0];
+                            msg = errors[firstKey][0];
+                        } else if (xhr.responseJSON?.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        showToast(msg, 'error');
+                    },
+                    complete: function () {
+                        btn.prop('disabled', false).html('<i class="las la-save me-2"></i>Save Bank Details');
+                    }
+                });
+            });
 
             $('#updateProfileForm').on('submit', function (e) {
                 e.preventDefault();

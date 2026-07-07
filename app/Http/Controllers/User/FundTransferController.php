@@ -31,7 +31,7 @@ class FundTransferController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->post("{$this->apiBaseUrl}/fund-transfer/transfer", [
+            $response = Http::withToken(session('token'))->timeout(10)->post("{$this->apiBaseUrl}/fund-transfer/transfer", [
                 'sender_id' => $userId,
                 'receiver_username' => $request->receiver_username,
                 'amount' => $request->amount,
@@ -56,7 +56,7 @@ class FundTransferController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/fund-transfer/sent", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/fund-transfer/sent", [
                 'user_id' => $userId,
                 'date_from' => $request->date_from ?? '',
                 'date_to' => $request->date_to ?? '',
@@ -85,7 +85,7 @@ class FundTransferController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/fund-transfer/received", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/fund-transfer/received", [
                 'user_id' => $userId,
                 'date_from' => $request->date_from ?? '',
                 'date_to' => $request->date_to ?? '',
@@ -114,7 +114,7 @@ class FundTransferController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/fund-transfer/wallet-balance", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/fund-transfer/wallet-balance", [
                 'user_id' => $userId,
             ]);
 

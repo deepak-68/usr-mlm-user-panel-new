@@ -78,13 +78,13 @@
                         [
                             'route' => 'user.cards',
                             'icon' => 'las la-id-badge',
-                            'title' => 'ID Card',
+                            'title' => 'ID Card & Visiting Cards',
                         ],
-                        [
-                            'route' => 'user.cards',
-                            'icon' => 'las la-address-card',
-                            'title' => 'Visiting Card',
-                        ],
+                        // [
+                        //     'route' => 'user.cards',
+                        //     'icon' => 'las la-address-card',
+                        //     'title' => 'Visiting Card',
+                        // ],
                         [
                             'route' => 'user.signup-acknowledgement',
                             'icon' => 'las la-file-signature',
@@ -188,20 +188,20 @@
                 @php
                     $fundRoutes = [
                         [
-                            'route' => 'user.admin-bank-detail',
-                            'icon' => 'las la-university',
-                            'title' => 'Admin Bank Detail'
-                        ],
-                        [
-                            'route' => 'user.fund-summary',
-                            'icon' => 'las la-chart-pie',
-                            'title' => 'Fund Summary'
+                            'route' => 'user.wallet',
+                            'icon' => 'las la-wallet',
+                            'title' => 'My Wallet'
                         ],
                         [
                             'route' => 'user.fund-request',
                             'icon' => 'las la-hand-holding-usd',
                             'title' => 'Fund Request'
                         ],
+                        [
+                            'route' => 'user.fund-summary',
+                            'icon' => 'las la-chart-pie',
+                            'title' => 'Fund Summary'
+                        ],                          
                         [
                             'route' => 'user.fund-request-status',
                             'icon' => 'las la-clipboard-list',

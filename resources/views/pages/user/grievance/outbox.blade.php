@@ -90,6 +90,47 @@
     </div>
 </div>
 
+{{-- ── Ticket Detail Modal ──────────────────────────────────────── --}}
+<div class="modal fade" id="ticketModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <div>
+                    <h5 class="modal-title" id="modalTicketTitle">Ticket</h5>
+                    <small class="text-muted" id="modalTicketSubject"></small>
+                </div>
+                <span id="modalTicketStatus"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="ticketMessagesBody">
+                <div class="text-center text-muted py-5">
+                    <i class="las la-spinner la-spin la-2x"></i>
+                    <p class="mt-2">Loading messages...</p>
+                </div>
+            </div>
+            <div class="modal-footer" id="ticketReplyFooter">
+                <form id="replyForm" class="w-100" enctype="multipart/form-data">
+                    <input type="hidden" name="ticket_id" id="replyTicketId">
+                    <div class="mb-2">
+                        <textarea name="message" id="replyMessage" class="form-control" rows="2"
+                                  placeholder="Type your reply..." required></textarea>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="file" name="attachment" id="replyAttachment"
+                               class="form-control form-control-sm" style="max-width:200px"
+                               accept=".jpg,.jpeg,.png,.pdf">
+                        <button type="submit" class="btn btn-primary btn-sm" id="replySubmitBtn"
+                                style="background:#1e3a5f;border:none;">
+                            <i class="las la-paper-plane me-1"></i> Send
+                        </button>
+                    </div>
+                    <small class="text-muted">Allowed: jpg, jpeg, png, pdf (max 5MB)</small>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('styles')
@@ -181,6 +222,122 @@ document.addEventListener('DOMContentLoaded', function () {
 document.getElementById('filterForm').addEventListener('submit', function (e) {
     e.preventDefault();
     loadOutbox(document.getElementById('statusFilter').value);
+});
+
+// ── Load ticket messages ──────────────────────────────────────────
+function loadTicketMessages(ticketId) {
+    document.getElementById('ticketMessagesBody').innerHTML =
+        '<div class="text-center text-muted py-5"><i class="las la-spinner la-spin la-2x"></i><p class="mt-2">Loading messages...</p></div>';
+
+    fetch(`{{ url('grievance/ticket-messages') }}/${ticketId}`, {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.status) {
+            document.getElementById('ticketMessagesBody').innerHTML =
+                `<div class="alert alert-danger">${data.message || 'Failed to load messages.'}</div>`;
+            return;
+        }
+
+        const ticket = data.ticket;
+        document.getElementById('modalTicketTitle').textContent = `Ticket #${ticket.ticket_no}`;
+        document.getElementById('modalTicketSubject').textContent = ticket.subject;
+        document.getElementById('modalTicketStatus').innerHTML =
+            statusBadge[ticket.status] || `<span class="badge bg-secondary">${ticket.status}</span>`;
+
+        document.getElementById('ticketReplyFooter').style.display =
+            ticket.status === 'closed' ? 'none' : '';
+
+        if (!data.messages || data.messages.length === 0) {
+            document.getElementById('ticketMessagesBody').innerHTML =
+                '<div class="text-center text-muted py-4">No messages yet.</div>';
+            return;
+        }
+
+        let html = '<div class="chat-thread">';
+        data.messages.forEach(msg => {
+            const align = msg.is_user ? 'text-end' : 'text-start';
+            const bg    = msg.is_user ? 'bg-primary text-white' : 'bg-light';
+            const name  = msg.sender_name || (msg.is_user ? 'You' : 'Support');
+            const time  = msg.created_at || '';
+
+            let attachmentsHtml = '';
+            if (msg.attachments && msg.attachments.length > 0) {
+                attachmentsHtml = msg.attachments.map(a =>
+                    `<br><a href="${a.url}" target="_blank" class="small ${msg.is_user ? 'text-white' : ''}">
+                        <i class="las la-paperclip"></i> View Attachment</a>`
+                ).join('');
+            }
+
+            html += `
+                <div class="mb-3 ${align}">
+                    <div class="d-inline-block ${bg} rounded-3 px-3 py-2" style="max-width:80%;text-align:left;">
+                        <small class="fw-bold d-block ${msg.is_user ? 'text-white-50' : 'text-muted'}">${name}</small>
+                        <p class="mb-1">${msg.message}</p>
+                        ${attachmentsHtml}
+                        <small class="d-block ${msg.is_user ? 'text-white-50' : 'text-muted'}" style="font-size:11px;">${time}</small>
+                    </div>
+                </div>`;
+        });
+        html += '</div>';
+        document.getElementById('ticketMessagesBody').innerHTML = html;
+    })
+    .catch(() => {
+        document.getElementById('ticketMessagesBody').innerHTML =
+            '<div class="alert alert-danger">Failed to load messages. Please try again.</div>';
+    });
+}
+
+// ── Open ticket detail modal ──────────────────────────────────────
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.view-messages');
+    if (!btn) return;
+
+    const ticketId = btn.dataset.id;
+    document.getElementById('replyTicketId').value = ticketId;
+    document.getElementById('replyMessage').value = '';
+    document.getElementById('replyAttachment').value = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
+    modal.show();
+
+    loadTicketMessages(ticketId);
+});
+
+// ── Submit reply ──────────────────────────────────────────────────
+document.getElementById('replyForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('replySubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="las la-spinner la-spin"></i> Sending...';
+
+    const formData = new FormData(this);
+
+    fetch(`{{ route('user.grievance.reply-ticket') }}`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Reply sent successfully');
+            document.getElementById('replyMessage').value = '';
+            document.getElementById('replyAttachment').value = '';
+            loadTicketMessages(document.getElementById('replyTicketId').value);
+        } else {
+            showToast(data.message || 'Failed to send reply.', 'error');
+        }
+    })
+    .catch(() => showToast('Failed to send reply. Please try again.', 'error'))
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="las la-paper-plane me-1"></i> Send';
+    });
 });
 </script>
 @endpush

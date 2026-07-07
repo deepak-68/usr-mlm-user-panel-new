@@ -23,7 +23,7 @@ class FundRequestStatusController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/fund-requests", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/fund-requests", [
                 'user_id' => $userId,
                 'status' => $request->status ?? '',
             ]);

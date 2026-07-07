@@ -30,7 +30,7 @@ class FundSummaryController extends Controller
                 'date_to' => $request->date_to ?? '',
             ];
 
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/fund-summary", $queryParams);
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/fund-summary", $queryParams);
 
             if ($response->successful()) {
                 $data = $response->json();

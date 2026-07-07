@@ -22,25 +22,21 @@ class WalletController extends Controller
             return redirect()->route('login')->with('error', 'Please login first.');
         }
 
+        $walletData = null;
+
         try {
-            // Fetch wallets
-            $walletResponse = Http::timeout(10)->get("{$this->apiBaseUrl}/wallets", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/wallet", [
                 'user_id' => $userId,
             ]);
 
-            $wallets = collect();
-            if ($walletResponse->successful()) {
-                $wallets = collect($walletResponse->json()['data'] ?? [])->map(fn($item) => (object) $item);
+            if ($response->successful()) {
+                $walletData = $response->json()['data'] ?? null;
             }
-
-            return view('pages.user.wallets', compact('wallets'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to load wallets');
+            session()->flash('error', 'Failed to load wallet data');
         }
 
-        return view('pages.user.wallets', [
-            'wallets' => collect()
-        ]);
+        return view('pages.user.wallet', compact('walletData'));
     }
 
     public function getTransactions(Request $request)

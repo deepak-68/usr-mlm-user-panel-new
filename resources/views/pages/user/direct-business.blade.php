@@ -162,7 +162,7 @@
                                         <th>City</th>
                                         <th>Joining Date</th>
                                         <th>Rank</th>
-                                        <th class="text-center">Self CC</th>
+                                        <th class="text-center">Purchased CC</th>
                                         <th class="text-center">Total CC</th>
                                         <th style="width: 200px;">Action</th>
                                     </tr>

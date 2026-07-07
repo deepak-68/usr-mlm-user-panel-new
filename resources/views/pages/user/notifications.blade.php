@@ -125,7 +125,7 @@ function loadNotifications(page) {
         list.querySelectorAll('.mark-read').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.dataset.id;
-                fetch('{{ route("user.notifications.mark-read", "") }}/' + id, {
+                fetch('{{ url("notifications") }}/' + id + '/read', {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
                 }).then(() => {

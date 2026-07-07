@@ -32,8 +32,8 @@ class FundRequestController extends Controller
         try {
             $url = "{$this->apiBaseUrl}/admin-bank-details";
             
-            $response = Http::timeout(10)->get($url);
-            
+            $response = Http::withToken(session('token'))->timeout(10)->get($url);
+
             if ($response->successful()) {
                 $data = $response->json();
                 return response()->json([
@@ -41,12 +41,11 @@ class FundRequestController extends Controller
                     'data' => $data['data'] ?? []
                 ]);
             }
-            
-            // ✅ Agar API fail hoti hai, toh exact status aur error return karein
+
             return response()->json([
                 'success' => false,
                 'message' => 'Admin API Error: Status ' . $response->status(),
-                'details' => $response->body() // Yeh asli error dikhayega
+                'details' => $response->body()
             ], 500);
             
         } catch (\Exception $e) {
@@ -95,7 +94,7 @@ class FundRequestController extends Controller
 
             Log::info('Fund Request Payload', $data);
 
-            $http = Http::timeout(30);
+            $http = Http::withToken(session('token'))->timeout(30);
 
             if ($request->hasFile('hash_code')) {
 

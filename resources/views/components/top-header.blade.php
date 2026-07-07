@@ -86,7 +86,7 @@
                     <div class="dropdown-menu dropdown-menu-end">
                         <!-- item-->
                         <a class="dropdown-item" href="{{ route('user.profile') }}"><i class="bx bx-user fs-15 align-middle me-1"></i> <span key="t-profile">Profile</span></a>
-                        <a class="dropdown-item" href="{{ route('user.registration') }}"><i class="bx bx-user fs-15 align-middle me-1"></i> <span key="t-profile">Registration</span></a>
+                        {{-- <a class="dropdown-item" href="{{ route('user.registration') }}"><i class="bx bx-user fs-15 align-middle me-1"></i> <span key="t-profile">Registration</span></a> --}}
 
                         {{-- <a class="dropdown-item" href="#"><i class="bx  bx-user fs-15 align-middle me-1"></i> <span key="t-profile">Registration</span></a> --}}
 

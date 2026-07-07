@@ -66,6 +66,7 @@
                                     <th>Transaction No</th>
                                     <th>Date</th>
                                     <th class="text-center">Status</th>
+                                    <th>Your Bank Account</th>
                                     <th>Admin Remark</th>
                                 </tr>
                             </thead>
@@ -102,11 +103,21 @@
                                             </span>
                                         @endif
                                     </td>
+                                    <td>
+                                        @php $ubd = $request->user_bank_detail ?? null; @endphp
+                                        @if($ubd)
+                                            <strong>{{ $ubd['account_holder_name'] ?? '' }}</strong><br>
+                                            <small>{{ $ubd['bank_name'] ?? '' }} - {{ $ubd['account_number'] ?? '' }}</small><br>
+                                            <small class="text-muted">IFSC: {{ $ubd['ifsc_code'] ?? '' }}</small>
+                                        @else
+                                            <span class="text-muted">Not provided</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $request->admin_remark ?? '-' }}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="text-center py-5">
+                                    <td colspan="9" class="text-center py-5">
                                         <i class="las la-clipboard-list fs-1 text-muted d-block mb-3"></i>
                                         <h5 class="text-muted">No Fund Requests Found</h5>
                                         <p class="text-muted mb-0">You haven't submitted any fund requests yet.</p>

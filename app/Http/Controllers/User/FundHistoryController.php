@@ -23,7 +23,7 @@ class FundHistoryController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/fund-summary", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/fund-summary", [
                 'user_id' => $userId,
                 'type' => $request->type ?? '',
                 'date_from' => $request->date_from ?? '',
@@ -55,7 +55,7 @@ class FundHistoryController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/withdrawal-history", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/withdrawal-history", [
                 'user_id' => $userId,
             ]);
 

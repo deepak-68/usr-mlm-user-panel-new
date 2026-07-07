@@ -77,7 +77,7 @@
                     </div>
 
                     <!-- Section: Income KPIs (7 Types) -->
-                    <div class="row mb-3">
+                    {{-- <div class="row mb-3">
                         <div class="col-12">
                             <h5 class="mb-3"><i class="las la-chart-pie me-1"></i> Income Overview</h5>
                         </div>
@@ -125,7 +125,7 @@
                             </div>
                         </div>
                         @endforeach
-                    </div>
+                    </div> --}}
 
                     <!-- Section: Account Summary -->
                     <div class="row mb-3">
@@ -154,12 +154,12 @@
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <p class="kpi-label">Self CC</p>
+                                            <p class="kpi-label">Referral Income</p>
                                             <h4 class="kpi-value">{{ number_format($self_cc ?? 0, 2) }}</h4>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <div class="kpi-icon">
-                                                <i class="las la-shopping-bag"></i>
+                                                <i class="las la-users"></i>
                                             </div>
                                         </div>
                                     </div>

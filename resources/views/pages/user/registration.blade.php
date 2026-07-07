@@ -41,13 +41,13 @@
                                 <!-- Username -->
                                 <div class="col-md-4">
                                     <label class="form-label">Username</label>
-                                    <input type="text" class="form-control" name="user_name" placeholder="Enter Username">
+                                    <input type="text"  class="form-control" name="user_name" placeholder="Enter Username">
                                 </div>
     
                                 <!-- Sponsor -->
                                 <div class="col-md-4">
                                     <label class="form-label">Sponsor</label>
-                                    <input type="text" class="form-control" name="sponsor" value="{{ session('user_name') ?? 'N/A' }}" readonly>
+                                    <input type="text" value="{{ session('user.user_name') ?? '' }}" class="form-control" name="sponsor" value="{{ session('user_name') ?? 'N/A' }}" readonly>
                                 </div>
     
                                 <!-- First Name -->

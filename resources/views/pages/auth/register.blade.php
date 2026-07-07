@@ -614,11 +614,12 @@
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
                     var content = '';
-                    if (data && data.data && data.data.content) {
-                        content = data.data.content;
-                    } else if (data && data.content) {
-                        content = data.content;
+                    if (type === 'privacy') {
+                        content = (data && data.privacy_policy && data.privacy_policy.description) || '';
                     } else {
+                        content = (data && data.terms_conditions && data.terms_conditions.description) || '';
+                    }
+                    if (!content) {
                         content = '<div class="alert alert-warning">Content not available.</div>';
                     }
                     bodyEl.innerHTML = content;

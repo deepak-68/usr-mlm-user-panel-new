@@ -171,6 +171,77 @@ class GrievanceController extends Controller
         }
     }
 
+    // ─── API Proxy: Ticket Messages (thread view) ──────────────────────────
+
+    public function getTicketMessages($id)
+    {
+        $userId = session('user_id');
+        if (!$userId) {
+            return response()->json(['success' => false, 'message' => 'Please login first'], 401);
+        }
+
+        try {
+            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/ticket-messages/{$id}");
+
+            return $response->successful()
+                ? response()->json($response->json())
+                : response()->json(['success' => false, 'message' => 'API Error: ' . $response->status()], 500);
+        } catch (\Exception $e) {
+            Log::error('Ticket Messages Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    // ─── API Proxy: Reply to Ticket ────────────────────────────────────────
+
+    public function replyTicket(Request $request)
+    {
+        $userId = session('user_id');
+        if (!$userId) {
+            return response()->json(['success' => false, 'message' => 'Please login first'], 401);
+        }
+
+        $request->validate([
+            'ticket_id' => 'required|exists:grivances,id',
+            'message'   => 'required|string',
+        ]);
+
+        try {
+            $httpRequest = Http::timeout(30);
+
+            if ($request->hasFile('attachment')) {
+                $file = $request->file('attachment');
+                $httpRequest = $httpRequest->attach(
+                    'attachment',
+                    file_get_contents($file->getRealPath()),
+                    $file->getClientOriginalName()
+                );
+            }
+
+            $response = $httpRequest->post("{$this->apiBaseUrl}/reply-ticket", [
+                'ticket_id' => $request->ticket_id,
+                'sender_id' => $userId,
+                'message'   => $request->message,
+            ]);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reply sent successfully',
+                    'data'    => $response->json('data'),
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $response->json('message', 'Failed to send reply'),
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Reply Ticket Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     // ─── API Proxy: Inbox (admin replies to this user) ───────────────────────
 
     public function getInboxData(Request $request)

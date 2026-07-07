@@ -25,7 +25,7 @@ class NotificationController extends Controller
         }
 
         if ($request->ajax()) {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/notifications", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/notifications", [
                 'user_id' => $userId,
                 'type' => $request->type ?? 'all',
                 'per_page' => $request->per_page ?? 20,
@@ -49,7 +49,7 @@ class NotificationController extends Controller
             return response()->json(['unread_count' => 0]);
         }
 
-        $response = Http::timeout(5)->get("{$this->apiBaseUrl}/notifications/unread-count", [
+        $response = Http::withToken(session('token'))->timeout(5)->get("{$this->apiBaseUrl}/notifications/unread-count", [
             'user_id' => $userId,
         ]);
 
@@ -63,7 +63,7 @@ class NotificationController extends Controller
         $userId = session('user_id');
         if (!$userId) return response()->json(['success' => false], 401);
 
-        Http::timeout(5)->post("{$this->apiBaseUrl}/notifications/{$id}/read", [
+        Http::withToken(session('token'))->timeout(5)->post("{$this->apiBaseUrl}/notifications/{$id}/read", [
             'user_id' => $userId,
         ]);
 
@@ -75,7 +75,7 @@ class NotificationController extends Controller
         $userId = session('user_id');
         if (!$userId) return response()->json(['success' => false], 401);
 
-        Http::timeout(5)->post("{$this->apiBaseUrl}/notifications/read-all", [
+        Http::withToken(session('token'))->timeout(5)->post("{$this->apiBaseUrl}/notifications/read-all", [
             'user_id' => $userId,
         ]);
 
