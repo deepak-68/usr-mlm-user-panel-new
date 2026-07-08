@@ -277,8 +277,28 @@
                         ],
                         [
                             'route' => 'user.matching-income',
-                            'icon' => 'las la-euro-sign',
+                            'icon' => 'las la-handshake',
                             'title' => 'Matching Income',
+                        ],
+                        [
+                            'route' => 'user.level-income',
+                            'icon' => 'las la-layer-group',
+                            'title' => 'Level Income',
+                        ],
+                        [
+                            'route' => 'user.repurchase-income',
+                            'icon' => 'las la-sync-alt',
+                            'title' => 'Repurchase Income',
+                        ],
+                        [
+                            'route' => 'user.rank-income',
+                            'icon' => 'las la-medal',
+                            'title' => 'Rank Income',
+                        ],
+                        [
+                            'route' => 'user.reward-tour-income',
+                            'icon' => 'las la-trophy',
+                            'title' => 'Reward & Tour Income',
                         ],
                         [
                             'route' => 'user.income-log',
@@ -286,56 +306,41 @@
                             'title' => 'Referral Income Log',
                         ],
                         [
+                            'route' => 'user.generation-income',
+                            'icon' => 'las la-chart-line',
+                            'title' => 'Generation Income',
+                        ],
+                        [
+                            'route' => 'user.awards-rewards',
+                            'icon' => 'las la-award',
+                            'title' => 'Awards and Rewards',
+                        ],
+                        [
+                            'route' => 'user.downline-rank',
+                            'icon' => 'las la-sitemap',
+                            'title' => 'Downline Rank',
+                        ],
+                        [
+                            'route' => 'user.weekly-payout',
+                            'icon' => 'las la-calendar-week',
+                            'title' => 'Weekly Payout',
+                        ],
+                        [
+                            'route' => 'user.retreat-tours',
+                            'icon' => 'las la-plane',
+                            'title' => 'Retreat, Asia, International Tours',
+                        ],
+                        [
                             'route' => 'user.notifications',
                             'icon' => 'las la-bell',
                             'title' => 'Notifications',
                         ],
-                        // [
-                        //     'route' => 'user.cash-bonus-request',
-                        //     'icon' => 'las la-gift',
-                        //     'title' => 'Cash Bonus Request',
-                        // ],
-                        // [
-                        //     'route' => 'user.claim-cash-request',
-                        //     'icon' => 'las la-donate',
-                        //     'title' => 'Claim Cash Request',
-                        // ],
-                        // [
-                        //     'route' => 'user.cash-bonus-history',
-                        //     'icon' => 'las la-history',
-                        //     'title' => 'Cash Bonus History',
-                        // ],
-                        // [
-                        //     'route' => 'user.generation-income',
-                        //     'icon' => 'las la-chart-line',
-                        //     'title' => 'Generation Income',
-                        // ],
-                        // [
-                        //     'route' => 'user.awards-rewards',
-                        //     'icon' => 'las la-trophy',
-                        //     'title' => 'Awards and Rewards',
-                        // ],
-                        // [
-                        //     'route' => 'user.downline-rank',
-                        //     'icon' => 'las la-medal',
-                        //     'title' => 'Downline Rank',
-                        // ],
-                        // [
-                        //     'route' => 'user.weekly-payout',
-                        //     'icon' => 'las la-calendar-week',
-                        //     'title' => 'Weekly Payout',
-                        // ],
-                        // [
-                        //     'route' => 'user.retreat-tours',
-                        //     'icon' => 'las la-plane',
-                        //     'title' => 'Retreat, Asia, International Tours',
-                        // ],
                     ];
 
                     $walletRouteNames = collect($walletRoutes)->pluck('route')->toArray();
                 @endphp
 
-                {{-- <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs($walletRouteNames) ? 'active' : '' }}"
                         href="#sidebarWallet"
                         data-bs-toggle="collapse"
@@ -344,7 +349,7 @@
                         aria-controls="sidebarWallet">
 
                         <i class="las la-wallet"></i>
-                        <span data-key="t-authentication">Wallet</span>
+                        <span data-key="t-authentication">Income</span>
                     </a>
 
                     <div class="collapse menu-dropdown {{ request()->routeIs($walletRouteNames) ? 'show' : '' }}"
@@ -363,7 +368,7 @@
                         </ul>
 
                     </div>
-                </li> --}}
+                </li>
 
                 <!-- Delivery Report Dropdown -->
                 @php

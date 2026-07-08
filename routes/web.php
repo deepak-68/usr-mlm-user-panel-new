@@ -31,6 +31,10 @@ use App\Http\Controllers\User\ByCourierAwardController;
 use App\Http\Controllers\User\OtherProductsController;
 use App\Http\Controllers\User\GrievanceController;
 use App\Http\Controllers\User\IncomeController;
+use App\Http\Controllers\User\LevelIncomeController;
+use App\Http\Controllers\User\RepurchaseIncomeController;
+use App\Http\Controllers\User\RankIncomeController;
+use App\Http\Controllers\User\RewardTourIncomeController;
 use App\Http\Controllers\User\KycController;
 use App\Http\Controllers\User\OrderForSomeoneController;
 use App\Http\Controllers\User\BankDetailController;
@@ -128,6 +132,22 @@ Route::middleware('auth.mlm')->group(function () {
     Route::get('/generation-income/data', [GenerationIncomeController::class, 'getGenerationIncomeData'])->name('user.generation-income.data');
     Route::get('/awards-rewards', [AwardsRewardsController::class, 'index'])->name('user.awards-rewards');
     Route::get('/awards-rewards/data', [AwardsRewardsController::class, 'getAwardsData'])->name('user.awards-rewards.data');
+
+    // Level Income
+    Route::get('/level-income', [LevelIncomeController::class, 'index'])->name('user.level-income');
+    Route::get('/level-income/data', [LevelIncomeController::class, 'getLevelIncomeData'])->name('user.level-income.data');
+
+    // Repurchase Income
+    Route::get('/repurchase-income', [RepurchaseIncomeController::class, 'index'])->name('user.repurchase-income');
+    Route::get('/repurchase-income/data', [RepurchaseIncomeController::class, 'getRepurchaseIncomeData'])->name('user.repurchase-income.data');
+
+    // Rank Income
+    Route::get('/rank-income', [RankIncomeController::class, 'index'])->name('user.rank-income');
+    Route::get('/rank-income/data', [RankIncomeController::class, 'getRankIncomeData'])->name('user.rank-income.data');
+
+    // Reward Tour Income
+    Route::get('/reward-tour-income', [RewardTourIncomeController::class, 'index'])->name('user.reward-tour-income');
+    Route::get('/reward-tour-income/data', [RewardTourIncomeController::class, 'getRewardTourIncomeData'])->name('user.reward-tour-income.data');
 
     // Downline / Payout / Tours
     Route::get('/downline-rank', [DownlineRankController::class, 'index'])->name('user.downline-rank');
