@@ -162,7 +162,6 @@
                                         <th>City</th>
                                         <th>Joining Date</th>
                                         <th>Rank</th>
-                                        <th class="text-center">Purchased CC</th>
                                         <th class="text-center">Total CC</th>
                                         <th style="width: 200px;">Action</th>
                                     </tr>
@@ -212,7 +211,6 @@
                                                     {{ $member['current_rank']['rank']['name'] ?? $member['current_rank']['rank']['slug'] ?? 'Fresh' }}
                                                 </span>
                                             </td>
-                                            <td class="text-center fw-bold">{{ number_format($member['self_cc'] ?? 0) }}</td>
                                             <td class="text-center fw-bold text-primary">
                                                 {{ number_format($member['payout_balance']->cc_balance ?? ($member['cc_balance'] ?? 0)) }}
                                             </td>
@@ -231,7 +229,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="12" class="text-center py-5">
+                                            <td colspan="11" class="text-center py-5">
                                                 <div class="py-5">
                                                     <i class="las la-users fs-1 text-muted d-block mb-3"></i>
                                                     <h5 class="text-muted">No Direct Team Members Found</h5>

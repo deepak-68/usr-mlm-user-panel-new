@@ -37,7 +37,6 @@
                                 <label class="form-label text-muted fw-medium">Income Type</label>
                                 <select name="income_type" id="incomeType" class="form-select">
                                     <option value="all">All Types</option>
-                                    <option value="retail">Retail Income</option>
                                     <option value="direct">Direct Income</option>
                                     <option value="matching">Matching Income</option>
                                     <option value="level">Level Income</option>
@@ -176,7 +175,6 @@ function loadLogs(page) {
                 ? (log.from_user.user_name || log.from_user.first_name + ' ' + (log.from_user.last_name || ''))
                 : '—';
             const incomeTypeLabels = {
-                'retail': 'Retail Income',
                 'direct': 'Direct Income',
                 'matching': 'Matching Income',
                 'level': 'Level Income',

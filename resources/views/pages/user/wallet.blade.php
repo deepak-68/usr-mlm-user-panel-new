@@ -75,8 +75,8 @@
                                 <table class="table table-borderless mb-0">
                                     <tbody>
                                         <tr>
-                                            <td class="fw-semibold">Referral CC</td>
-                                            <td class="text-end fw-bold text-primary">{{ number_format($walletData['self_cc'], 2) }}</td>
+                                            <td class="fw-semibold">Direct Income CC</td>
+                                            <td class="text-end fw-bold text-primary">{{ number_format($walletData['direct_cc'] ?? 0, 2) }}</td>
                                         </tr>
                                         <tr>
                                             <td class="fw-semibold">CC from Payouts (Commissions)</td>

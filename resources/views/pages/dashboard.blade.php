@@ -150,8 +150,8 @@
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <p class="kpi-label">Referral Income</p>
-                                            <h4 class="kpi-value">{{ number_format($self_cc ?? 0, 2) }}</h4>
+                                            <p class="kpi-label">Direct Income CC</p>
+                                            <h4 class="kpi-value">{{ number_format($direct_cc ?? 0, 2) }}</h4>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <div class="kpi-icon">
