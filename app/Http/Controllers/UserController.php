@@ -90,7 +90,7 @@ class UserController extends Controller
     // Profile update
     public function updateProfile(Request $request)
     {
-        $userId = Session::get('user.id') ?? Session::get('user_id');
+        $userId = Session::get('user.id');
         $token = Session::get('token');
 
         if (!$userId) {
@@ -104,7 +104,7 @@ class UserController extends Controller
         ]);
 
         try {
-            $response = Http::timeout(10)->post(
+            $response = Http::timeout(10)->withToken($token)->post(
                 $this->apiBaseUrl . '/profile/update',
                 [
                     'user_id'    => $userId,
@@ -464,29 +464,39 @@ class UserController extends Controller
             ->with('new_password', $newTransactionPassword);
     }
     public function welcomeLetter()
-{
-    $userData = Session::get('user');
+    {
+        $userData = Session::get('user');
 
-    if (!$userData) {
-        return redirect()->route('login')->with('error', 'Please login first.');
+        if (!$userData) {
+            return redirect()->route('login')->with('error', 'Please login first.');
+        }
+
+        $token = Session::get('token');
+
+        $response = Http::withToken($token)
+            ->get($this->apiBaseUrl . '/profile');
+
+        if ($response->successful()) {
+            $data = $response->json();
+            $user = json_decode(json_encode($data['data']));
+        } else {
+            $user = (object) $userData;
+        }
+
+        return view('pages.welcome-letter', compact('user'));
     }
+    public function visitingCard()
+    {
+        $userData = Session::get('user');
 
-    $user = (object) $userData;
+        if (!$userData) {
+            return redirect()->route('login')->with('error', 'Please login first.');
+        }
 
-    return view('pages.welcome-letter', compact('user'));
-}
-public function visitingCard()
-{
-    $userData = Session::get('user');
+        $user = (object) $userData;
 
-    if (!$userData) {
-        return redirect()->route('login')->with('error', 'Please login first.');
+        return view('pages.visiting-card', compact('user'));
     }
-
-    $user = (object) $userData;
-
-    return view('pages.visiting-card', compact('user'));
-}
 
 // Common page for ID Card + Visiting Card
 public function cards()
@@ -560,6 +570,7 @@ public function signupAcknowledgement()
     } else {
         $user = (object) $userData;
     }
+
 
     return view('pages.signup-acknowledgement', compact('user'));
 }

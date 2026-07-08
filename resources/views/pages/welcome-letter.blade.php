@@ -18,6 +18,8 @@
                     </a>
                 </div>
             </div>
+        {{-- @dump($user); --}}
+        {{-- @dump(session('token')) --}}
 
             <!-- Welcome Letter Content -->
             <div class="welcome-letter-container" id="welcomeLetter">
@@ -89,7 +91,7 @@
                             </tr>
                             <tr>
                                 <td class="label-cell"><strong>Address:</strong></td>
-                                <td class="value-cell" colspan="3">{{ $user->address ?? 'N/A' }}, {{ $user->district ?? '' }} - {{ $user->pincode ?? '' }}, {{ $user->state ?? '' }}</td>
+                                <td class="value-cell" colspan="3">{{ $user->detail?->address_line_1 ?? 'N/A' }}, {{ $user->detail?->address_line_1 ?? 'N/A' }}, {{ $user->detail?->district ?? '' }}, {{ $user->detail?->state ?? '' }} - {{ $user->detail?->pincode ?? '' }}</td>
                             </tr>
                             <tr>
                                 <td class="label-cell"><strong>Date of Joining:</strong></td>
@@ -99,22 +101,33 @@
                             </tr>
                         </table>
                     </div>
-
                     <!-- Sponsor Details -->
                     <div class="sponsor-details-section">
                         <h4 class="section-title">SPONSOR / UPLINE DETAILS</h4>
                         <table class="details-table">
                             <tr>
                                 <td class="label-cell"><strong>Sponsor Name:</strong></td>
-                                <td class="value-cell">{{ $user->sponsor->first_name ?? 'N/A' }} {{ $user->sponsor->last_name ?? '' }}</td>
+                                <td class="value-cell">
+                                    {{ data_get($user, 'sponsor.first_name', 'N/A') }}
+                                    {{ data_get($user, 'sponsor.last_name', '') }}
+                                </td>
+
                                 <td class="label-cell"><strong>Sponsor ID:</strong></td>
-                                <td class="value-cell">{{ $user->sponsor->user_name ?? 'N/A' }}</td>
+                                <td class="value-cell">
+                                    {{ data_get($user, 'sponsor.user_name', 'N/A') }}
+                                </td>
                             </tr>
+
                             <tr>
                                 <td class="label-cell"><strong>Sponsor Phone:</strong></td>
-                                <td class="value-cell">{{ $user->sponsor->phone ?? 'N/A' }}</td>
+                                <td class="value-cell">
+                                    {{ data_get($user, 'sponsor.phone', 'N/A') }}
+                                </td>
+
                                 <td class="label-cell"><strong>Sponsor Email:</strong></td>
-                                <td class="value-cell">{{ $user->sponsor->email ?? 'N/A' }}</td>
+                                <td class="value-cell">
+                                    {{ data_get($user, 'sponsor.email', 'N/A') }}
+                                </td>
                             </tr>
                         </table>
                     </div>

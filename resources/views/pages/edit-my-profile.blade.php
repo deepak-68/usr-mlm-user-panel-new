@@ -361,7 +361,7 @@
 
         <!-- Row: Bank Detail -->
         <div class="row mt-3">
-            <div class="col-md-6" id="bankDetailSection">
+            <div class="col-md-8" id="bankDetailSection">
                 <div class="card mb-4">
                     <div class="card-header"><h5 class="mb-0"><i class="las la-university me-2"></i>BANK DETAIL (For Receiving Payouts)</h5></div>
                     <div class="card-body">
@@ -393,7 +393,7 @@
                                         <p class="text-muted small mt-1">Current attachment. Upload a new file to replace.</p>
                                     </div>
                                 </div>
-                                <div class="col-md-6 d-flex align-items-end">
+                                <div class="col-md-12 d-flex align-items-end">
                                     <button type="submit" id="saveBankDetailBtn" class="btn btn-primary w-100">
                                         <i class="las la-save me-2"></i>Save Bank Details
                                     </button>
@@ -519,6 +519,7 @@
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
                         'Accept': 'application/json',
+                        'Authorization': 'Bearer {{ session("token") }}',
                     },
                     processData: false,
                     contentType: false,

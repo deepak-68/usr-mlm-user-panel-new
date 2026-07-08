@@ -65,9 +65,7 @@
                                                 <input type="hidden" id="referralLink" value="{{ route('register', ['sid' => $user->user_name]) }}" class="form-control" disabled >
                                                 <button type="button" class="btn btn-light fw-semibold rounded-start" id="copyBtn"><i class="mdi mdi-content-copy"></i>  Copy referal link</button> 
                                                 <button type="button" class="btn btn-success" id="shareBtn"><i class="mdi mdi-share-variant"></i> </button>
-                                                <a href="{{ route('register', ['sid' => $user->user_name]) }}" target="_blank" type="button" class="btn btn-primary rounded-end"><span class="mdi mdi-open-in-new"></span> </a> 
-
-                                                
+                                                <a href="{{ route('register', ['sid' => $user->user_name]) }}" target="_blank" type="button" class="btn btn-primary rounded-end"><span class="mdi mdi-open-in-new"></span> </a>                                                 
                                             </div>
                                         </div>
                                     </div>
@@ -77,14 +75,13 @@
                     </div>
 
                     <!-- Section: Income KPIs (7 Types) -->
-                    {{-- <div class="row mb-3">
+                    <div class="row mb-3">
                         <div class="col-12">
                             <h5 class="mb-3"><i class="las la-chart-pie me-1"></i> Income Overview</h5>
                         </div>
                         @php
                             $kpis = $income_kpis ?? [];
                             $icons = [
-                                'retail_income' => 'las la-store',
                                 'direct_income' => 'las la-hand-holding-usd',
                                 'matching_income' => 'las la-exchange-alt',
                                 'level_income' => 'las la-layer-group',
@@ -93,13 +90,12 @@
                                 'rank_income' => 'las la-trophy',
                             ];
                             $colors = [
-                                'retail_income' => 'primary',
                                 'direct_income' => 'success',
                                 'matching_income' => 'info',
                                 'level_income' => 'warning',
+                                'rank_income' => 'dark',
                                 'reward_tour_income' => 'danger',
                                 'repurchase_income' => 'secondary',
-                                'rank_income' => 'dark',
                             ];
                         @endphp
                         @foreach($kpis as $key => $kpi)
@@ -125,7 +121,7 @@
                             </div>
                         </div>
                         @endforeach
-                    </div> --}}
+                    </div>
 
                     <!-- Section: Account Summary -->
                     <div class="row mb-3">
