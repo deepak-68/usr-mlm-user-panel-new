@@ -89,10 +89,28 @@
 
 @endsection
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+@endpush
+
 @push('scripts')
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+let dataTable;
 
+function initializeTable() {
+    dataTable = $('#accountStatementTable').DataTable({
+        responsive: true,
+        pageLength: 10,
+        order: [[2, 'desc']],
+        language: {
+            zeroRecords: "No data available in table",
+            emptyTable: "No data available in table"
+        }
+    });
+}
 
 // Toast function
 function showToast(message, type = 'success') {

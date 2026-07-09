@@ -10,7 +10,6 @@ use App\Http\Controllers\User\UserMLMController;
 use App\Http\Controllers\User\FundSummaryController;
 use App\Http\Controllers\User\FundRequestController;
 use App\Http\Controllers\User\FundRequestStatusController;
-use App\Http\Controllers\User\FundTransferController;
 use App\Http\Controllers\User\FundHistoryController;
 use App\Http\Controllers\User\WalletController;use App\Http\Controllers\User\DirectIncomeController;
 use App\Http\Controllers\User\MatchingIncomeController;
@@ -100,11 +99,6 @@ Route::middleware('auth.mlm')->group(function () {
     Route::get('/api/fund-request/bank-details', [FundRequestController::class, 'getBankDetails'])->name('user.fund-request.bank-details');
     Route::post('/fund-request/submit', [FundRequestController::class, 'submit'])->name('user.fund-request.submit');
     Route::get('/fund-request-status', [FundRequestStatusController::class, 'index'])->name('user.fund-request-status');
-    Route::get('/fund-transfer', [FundTransferController::class, 'index'])->name('user.fund-transfer');
-    Route::post('/fund-transfer/transfer', [FundTransferController::class, 'transfer'])->name('user.fund-transfer.transfer');
-    Route::get('/fund-list', [FundTransferController::class, 'getSentTransfers'])->name('user.fund-list');
-    Route::get('/fund-receive-list', [FundTransferController::class, 'getReceivedTransfers'])->name('user.fund-receive-list');
-    Route::get('/api/wallet-balance', [FundTransferController::class, 'getWalletBalance'])->name('user.wallet-balance');
     Route::get('/fund-history', [FundHistoryController::class, 'index'])->name('user.fund-history');
 
     // Wallet
@@ -207,9 +201,11 @@ Route::middleware('auth.mlm')->group(function () {
     // Bank Details (User's own bank account for receiving payouts)
     Route::get('/bank-detail', [BankDetailController::class, 'show'])->name('user.bank-detail.show');
     Route::post('/bank-detail/save', [BankDetailController::class, 'save'])->name('user.bank-detail.save');
+    Route::post('/bank-detail/delete', [BankDetailController::class, 'delete'])->name('user.bank-detail.delete');
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('user.notifications');
+    Route::get('/notifications/recent', [NotificationController::class, 'recent'])->name('user.notifications.recent');
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('user.notifications.unread-count');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('user.notifications.mark-read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('user.notifications.mark-all-read');

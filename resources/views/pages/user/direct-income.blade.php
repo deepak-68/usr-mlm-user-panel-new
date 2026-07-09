@@ -115,20 +115,16 @@
                      
                 },
                 {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: function() {
-                        return 'N/A';
+                    data: 'reference_type',
+                    name: 'reference_type',
+                    render: function(data) {
+                        return data ? data.replace(/_/g, ' ').toUpperCase() : 'N/A';
                     }
                 },
                 {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: function() {
-                        return 'N/A';
-                    }
+                    data: 'reference_id',
+                    name: 'reference_id',
+                    defaultContent: '-'
                 },
                 {
                     data: null,

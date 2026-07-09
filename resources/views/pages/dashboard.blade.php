@@ -74,6 +74,17 @@
                         </div>
                     </div>
 
+                    @if(($kyc_status ?? 'not_submitted') !== 'approved')
+                    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center" role="alert">
+                        <i class="las la-id-card me-2 fs-4"></i>
+                        <div>
+                            <strong>KYC Pending!</strong> Please complete your KYC verification to activate your account.
+                            <a href="{{ route('user.kyc') }}" class="alert-link ms-1">Click here to submit KYC</a>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    @endif
+
                     <!-- Section: Income KPIs (7 Types) -->
                     <div class="row mb-3">
                         <div class="col-12">
@@ -251,12 +262,12 @@
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <p class="kpi-label">Total Income (CC)</p>
-                                            <h4 class="kpi-value">{{ number_format($total_income_cc ?? 0, 2) }}</h4>
+                                            <p class="kpi-label">Total Income (₹)</p>
+                                            <h4 class="kpi-value">₹{{ number_format($total_income_amount ?? 0, 2) }}</h4>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <div class="kpi-icon">
-                                                <i class="las la-wallet"></i>
+                                                <i class="las la-coins"></i>
                                             </div>
                                         </div>
                                     </div>

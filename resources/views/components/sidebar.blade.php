@@ -212,21 +212,7 @@
                             'icon' => 'las la-history',
                             'title' => 'Fund History'
                         ],
-                        [
-                            'route' => 'user.fund-transfer',
-                            'icon' => 'las la-exchange-alt',
-                            'title' => 'Fund Transfer'
-                        ],
-                        [
-                            'route' => 'user.fund-list',
-                            'icon' => 'las la-list',
-                            'title' => 'Fund List'
-                        ],
-                        [
-                            'route' => 'user.fund-receive-list',
-                            'icon' => 'las la-inbox',
-                            'title' => 'Fund Receive List'
-                        ],
+
                     ];
 
                     $fundRouteNames = collect($fundRoutes)->pluck('route')->toArray();
@@ -286,19 +272,9 @@
                             'title' => 'Level Income',
                         ],
                         [
-                            'route' => 'user.repurchase-income',
-                            'icon' => 'las la-sync-alt',
-                            'title' => 'Repurchase Income',
-                        ],
-                        [
                             'route' => 'user.rank-income',
                             'icon' => 'las la-medal',
                             'title' => 'Rank Income',
-                        ],
-                        [
-                            'route' => 'user.reward-tour-income',
-                            'icon' => 'las la-trophy',
-                            'title' => 'Reward & Tour Income',
                         ],
                         [
                             'route' => 'user.income-log',
@@ -306,34 +282,9 @@
                             'title' => 'Referral Income Log',
                         ],
                         [
-                            'route' => 'user.generation-income',
-                            'icon' => 'las la-chart-line',
-                            'title' => 'Generation Income',
-                        ],
-                        [
-                            'route' => 'user.awards-rewards',
-                            'icon' => 'las la-award',
-                            'title' => 'Awards and Rewards',
-                        ],
-                        [
-                            'route' => 'user.downline-rank',
-                            'icon' => 'las la-sitemap',
-                            'title' => 'Downline Rank',
-                        ],
-                        [
-                            'route' => 'user.weekly-payout',
-                            'icon' => 'las la-calendar-week',
-                            'title' => 'Weekly Payout',
-                        ],
-                        [
-                            'route' => 'user.retreat-tours',
-                            'icon' => 'las la-plane',
-                            'title' => 'Retreat, Asia, International Tours',
-                        ],
-                        [
-                            'route' => 'user.notifications',
-                            'icon' => 'las la-bell',
-                            'title' => 'Notifications',
+                            'route' => 'user.reward-tour-income',
+                            'icon' => 'las la-trophy',
+                            'title' => 'Reward & Tour Income',
                         ],
                     ];
 
@@ -371,7 +322,7 @@
                 </li>
 
                 <!-- Delivery Report Dropdown -->
-                @php
+                {{-- @php
                     $deliveryRoutes = [
                         [
                             'route' => 'user.order-history',
@@ -492,7 +443,7 @@
                         </ul>
 
                     </div>
-                </li>
+                </li> --}}
 
                 <!-- KYC Dropdown -->
                 @php

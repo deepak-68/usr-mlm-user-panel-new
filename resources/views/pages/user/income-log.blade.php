@@ -75,7 +75,6 @@
                         <table class="table table-bordered table-striped table-hover align-middle mb-0" id="incomeLogTable">
                             <thead class="table-dark">
                                 <tr>
-                                    <th class="text-center" style="width: 50px;">#</th>
                                     <th>Date</th>
                                     <th>Income Type</th>
                                     <th>From User</th>
@@ -86,19 +85,10 @@
                                     <th>Remarks</th>
                                 </tr>
                             </thead>
-                            <tbody id="logTableBody">
-                                <tr id="loadingRow">
-                                    <td colspan="9" class="text-center py-4">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                        <p class="text-muted mt-2 mb-0">Loading income logs...</p>
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody></tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="5" class="text-end">Totals:</th>
+                                    <th colspan="4" class="text-end">Totals:</th>
                                     <th id="totalPurchaseCc" class="text-end">0.00</th>
                                     <th id="totalIncomeCredited" class="text-end">0.00</th>
                                     <th id="totalBalance" class="text-end">—</th>
@@ -110,155 +100,105 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div class="text-muted small" id="tableInfo"></div>
-                <nav>
-                    <ul class="pagination mb-0" id="paginationLinks"></ul>
-                </nav>
-            </div>
-
         </div>
     </div>
 </div>
 
 @endsection
 
-@push('scripts')
-<script>
-let currentPage = 1;
-let lastPage = 1;
+@push('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+@endpush
 
-function loadLogs(page) {
-    const form = document.getElementById('incomeLogForm');
-    const formData = new FormData(form);
+@push('scripts')
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+let dataTable;
+
+function initializeTable() {
+    dataTable = $('#incomeLogTable').DataTable({
+        responsive: true,
+        pageLength: 10,
+        order: [[0, 'desc']],
+        language: {
+            zeroRecords: "No data available in table",
+            emptyTable: "No data available in table"
+        }
+    });
+}
+
+function loadData() {
+    dataTable.clear().draw();
 
     const params = new URLSearchParams();
     params.set('income_type', document.getElementById('incomeType').value);
     params.set('from_date', document.getElementById('fromDate').value);
     params.set('to_date', document.getElementById('toDate').value);
-    params.set('page', page || 1);
-
-    document.getElementById('loadingRow').style.display = '';
+    params.set('per_page', '100000');
 
     fetch('{{ route("user.income-log") }}?' + params.toString(), {
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
     })
     .then(res => res.json())
     .then(json => {
-        document.getElementById('loadingRow').style.display = 'none';
+        if (!json.success) return;
 
-        if (!json.success) {
-            document.getElementById('logTableBody').innerHTML =
-                '<tr><td colspan="9" class="text-center py-4 text-danger">Failed to load data.</td></tr>';
-            return;
-        }
+        let totalCc = 0, totalCurrency = 0;
+        const logs = json.data.data || [];
+        const incomeTypeLabels = {
+            'direct': 'Direct Income',
+            'matching': 'Matching Income',
+            'level': 'Level Income',
+            'reward_tour': 'Reward & Tour',
+            'repurchase': 'Repurchase Income',
+            'rank': 'Rank Income',
+        };
 
-        const data = json.data;
-        const logs = data.data || [];
-        const tbody = document.getElementById('logTableBody');
-        tbody.innerHTML = '';
+        logs.forEach((log) => {
+            const cc = parseFloat(log.cc_amount || 0);
+            const currency = parseFloat(log.currency_amount || 0);
+            totalCc += cc;
+            totalCurrency += currency;
 
-        if (!logs.length) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted"><i class="las la-inbox fs-1 d-block mb-2"></i>No income logs found.</td></tr>';
-            document.getElementById('tableInfo').textContent = '0 entries';
-            document.getElementById('paginationLinks').innerHTML = '';
-            document.getElementById('totalPurchaseCc').textContent = '0.00';
-            document.getElementById('totalIncomeCredited').textContent = '0.00';
-            document.getElementById('totalBalance').textContent = '—';
-            return;
-        }
-
-        logs.forEach((log, i) => {
-            const tr = document.createElement('tr');
             const fromUser = log.from_user
                 ? (log.from_user.user_name || log.from_user.first_name + ' ' + (log.from_user.last_name || ''))
                 : '—';
-            const incomeTypeLabels = {
-                'direct': 'Direct Income',
-                'matching': 'Matching Income',
-                'level': 'Level Income',
-                'reward_tour': 'Reward & Tour',
-                'repurchase': 'Repurchase Income',
-                'rank': 'Rank Income',
-            };
 
-            tr.innerHTML = `
-                <td class="text-center fw-bold">${(data.from || 0) + i}</td>
-                <td>${new Date(log.created_at).toLocaleDateString('en-IN', {day: '2-digit', month: '2-digit', year: 'numeric'})}</td>
-                <td><span class="badge bg-info text-dark">${incomeTypeLabels[log.income_type] || log.income_type}</span></td>
-                <td>${fromUser}</td>
-                <td>${log.order_number || '—'}</td>
-                <td class="text-end">${parseFloat(log.cc_amount).toFixed(2)}</td>
-                <td class="text-end fw-bold">${parseFloat(log.currency_amount).toFixed(2)}</td>
-                <td class="text-end">${parseFloat(log.balance_after).toFixed(2)}</td>
-                <td><small class="text-muted">${log.remarks || '—'}</small></td>
-            `;
-            tbody.appendChild(tr);
+            dataTable.row.add([
+                new Date(log.created_at).toLocaleDateString('en-IN', {day: '2-digit', month: '2-digit', year: 'numeric'}),
+                `<span class="badge bg-info text-dark">${incomeTypeLabels[log.income_type] || log.income_type}</span>`,
+                fromUser,
+                log.order_number || '—',
+                cc.toFixed(2),
+                `<span class="fw-bold">${currency.toFixed(2)}</span>`,
+                parseFloat(log.balance_after || 0).toFixed(2),
+                log.remarks || '—'
+            ]);
         });
 
-        // Totals
-        if (json.totals) {
-            document.getElementById('totalPurchaseCc').textContent = parseFloat(json.totals.total_cc).toFixed(2);
-            document.getElementById('totalIncomeCredited').textContent = parseFloat(json.totals.total_currency).toFixed(2);
-        }
-
-        // Pagination
-        currentPage = data.current_page || 1;
-        lastPage = data.last_page || 1;
-        document.getElementById('tableInfo').textContent = `Showing ${data.from || 0} to ${data.to || 0} of ${data.total || 0} entries`;
-
-        const pagination = document.getElementById('paginationLinks');
-        pagination.innerHTML = '';
-        for (let p = 1; p <= lastPage; p++) {
-            const li = document.createElement('li');
-            li.className = `page-item ${p === currentPage ? 'active' : ''}`;
-            li.innerHTML = `<a class="page-link" href="#" data-page="${p}">${p}</a>`;
-            li.querySelector('a').addEventListener('click', e => {
-                e.preventDefault();
-                loadLogs(p);
-            });
-            pagination.appendChild(li);
-        }
-    })
-    .catch(err => {
-        document.getElementById('loadingRow').style.display = 'none';
-        document.getElementById('logTableBody').innerHTML =
-            '<tr><td colspan="9" class="text-center py-4 text-danger">Error loading data.</td></tr>';
-        console.error(err);
+        document.getElementById('totalPurchaseCc').textContent = totalCc.toFixed(2);
+        document.getElementById('totalIncomeCredited').textContent = '₹' + totalCurrency.toFixed(2);
+        dataTable.draw();
     });
 }
 
 document.getElementById('incomeLogForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    loadLogs(1);
+    loadData();
 });
 
 document.getElementById('exportCsvBtn').addEventListener('click', function () {
-    const rows = document.querySelectorAll('#incomeLogTable tbody tr');
-    if (!rows.length || rows[0].querySelector('td[colspan]')) {
-        alert('No data to export.');
-        return;
-    }
+    const allData = dataTable.rows().data().toArray();
+    if (!allData.length) { alert('No data to export.'); return; }
 
-    const headers = ['#', 'Date', 'Income Type', 'From User', 'Order No', 'Purchase CC', 'Income Credited', 'Balance', 'Remarks'];
+    const headers = ['Date', 'Income Type', 'From User', 'Order No', 'Purchase CC', 'Income Credited', 'Balance', 'Remarks'];
     let csv = headers.join(',') + '\n';
 
-    rows.forEach(row => {
-        const cols = row.querySelectorAll('td');
-        if (cols.length < 9) return;
-        const rowData = [
-            cols[0].innerText.trim(),
-            cols[1].innerText.trim(),
-            cols[2].innerText.trim().replace(/<[^>]*>/g, ''),
-            cols[3].innerText.trim(),
-            cols[4].innerText.trim(),
-            cols[5].innerText.trim(),
-            cols[6].innerText.trim(),
-            cols[7].innerText.trim(),
-            cols[8].innerText.trim(),
-        ];
-        csv += rowData.join(',') + '\n';
+    allData.forEach(row => {
+        const escaped = row.map(cell => '"' + String(cell).replace(/<[^>]*>/g, '').replace(/"/g, '""') + '"');
+        csv += escaped.join(',') + '\n';
     });
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -269,7 +209,9 @@ document.getElementById('exportCsvBtn').addEventListener('click', function () {
     URL.revokeObjectURL(link.href);
 });
 
-// Initial load
-loadLogs(1);
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTable();
+    loadData();
+});
 </script>
 @endpush

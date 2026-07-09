@@ -28,7 +28,7 @@ class KycController extends Controller
         $kycData = null;
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/kyc/status", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/kyc/status", [
                 'user_id' => $userId,
             ]);
 
@@ -74,7 +74,7 @@ class KycController extends Controller
             }
 
 
-            $response = Http::timeout(30)
+            $response = Http::withToken(session('token'))->timeout(30)
                 ->asMultipart()
                 ->post("{$this->apiBaseUrl}/kyc/submit", $multipart);
 

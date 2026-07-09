@@ -1,3 +1,17 @@
+@php
+    $whatsappNumber = session('whatsapp_number');
+    if (!$whatsappNumber) {
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken(session('token'))
+                ->timeout(5)
+                ->get(env('API_BASE_URL') . '/whatsapp-number');
+            if ($response->successful() && $response->json('number')) {
+                $whatsappNumber = $response->json('number');
+                session(['whatsapp_number' => $whatsappNumber]);
+            }
+        } catch (\Exception $e) {}
+    }
+@endphp
 <!doctype html>
 <html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="light" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable">
 
@@ -25,6 +39,31 @@
     <link href="{{ url ('assets/css/app.min.css')}}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <style>
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #25D366;
+            color: #fff;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+            z-index: 9999;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(37, 211, 102, 0.6);
+        }
+    </style>
     @stack('styles')
 
 </head>
@@ -74,6 +113,15 @@
         }
     </script>
     @stack('scripts')
+
+    @if($whatsappNumber)
+    <a href="https://wa.me/{{ $whatsappNumber }}?text=Hi%20I%20need%20support"
+       target="_blank"
+       class="whatsapp-float"
+       title="Chat on WhatsApp">
+        <i class="lab la-whatsapp"></i>
+    </a>
+    @endif
 </body>
 
 </html>

@@ -11,8 +11,21 @@
                 <div class="col-12">
                     <div class="page-title-box shadow-sm border-0"> 
                                 <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-                                    <h4 class="mb-0 fs-20"><i class="las la-sitemap text-primary me-2"></i>GENEALOGY TREE</h4>
-                                    <a type="button" href="{{ route('user.genealogy') }}" class="btn btn-outline-primary">Reset</a>
+                                    <div>
+                                        <h4 class="mb-0 fs-20"><i class="las la-sitemap text-primary me-2"></i>GENEALOGY TREE</h4>
+                                        @if($rootUser->user_name ?? false)
+                                            <p class="text-muted small mb-0 mt-1">
+                                                <i class="las la-user me-1"></i> {{ $rootUser->first_name }} {{ $rootUser->last_name }} ({{ $rootUser->user_name }})
+                                            </p>
+                                        @endif
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        @if(request('user_id'))
+                                            <a href="{{ route('user.genealogy') }}" class="btn btn-outline-secondary" title="Reset to my tree">
+                                                <i class="las la-undo me-1"></i> Reset
+                                            </a>
+                                        @endif
+                                    </div>
                                 </div> 
                     </div>
                     <div id="tree"></div>
@@ -395,77 +408,8 @@
 
 @push('scripts')
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Tree script loaded');
-        
-        const treeWrapper = document.querySelector('.Treant');
-        if (!treeWrapper) return;
-
-        // Event delegation for tree clicks
-        treeWrapper.addEventListener('click', function(e) {
-            // 1️ Profile card click
-            const profileCard = e.target.closest('.custom-node');
-            if (profileCard) {
-                e.preventDefault();
-                e.stopPropagation();
-                const userId = profileCard.dataset.userId;
-                if (userId) openProfileModal(userId);
-                return;
-            }
-
-            // 2️⃣ Expand button click
-            const toggleBtn = e.target.closest('.subtree-toggle');
-            if (toggleBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const targetId = toggleBtn.dataset.target;
-                const subtree = document.getElementById(targetId);
-                if (subtree) {
-                    subtree.classList.toggle('show');
-                    toggleBtn.classList.toggle('expanded');
-                }
-            }
-        });
-
-        // Modal function
-        function openProfileModal(userId) {
-            const modalEl = document.getElementById('userProfileModal');
-            const modal = new bootstrap.Modal(modalEl);
-            const contentEl = document.getElementById('profileContent');
-            
-            contentEl.innerHTML = `
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-2 text-muted">Loading profile...</p>
-                </div>`;
-            
-            modal.show();
-
-            const url = `{{ url('/user-profile') }}/${userId}/modal`;
-
-            fetch(url)
-                .then(res => {
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    return res.text();
-                })
-                .then(html => {
-                    contentEl.innerHTML = html;
-                })
-                .catch(err => {
-                    contentEl.innerHTML = `
-                        <div class="alert alert-danger m-3">
-                            <i class="las la-exclamation-circle me-2"></i>
-                            Failed to load profile.
-                        </div>`;
-                });
-        }
-    });
-
-    // ✅ GLOBAL FUNCTION: Yeh function bahar hai taaki HTML button isse access kar sake
     window.loadUserTree = function(userId) {
-        console.log('Loading tree for user:', userId);
-
-         window.location.href = "{{ route('user.genealogy', ['user_id' => '__USER_ID__']) }}".replace('__USER_ID__', userId);
+        window.location.href = "{{ route('user.genealogy', ['user_id' => '__USER_ID__']) }}".replace('__USER_ID__', userId);
     };
     </script>
 
@@ -485,7 +429,7 @@
                 // },
 
                 innerHTML: `
-                    <div class="custom-node text-center" data-user-id="${node.user_public_id}">
+                    <div class="custom-node text-center" data-user-id="${node.user_id}">
 
                         <div class="user-avatar avatar-blue mb-2 border mx-auto">
                             ${
@@ -614,39 +558,40 @@
 
         });
 
-        $(document).on('click', '.empty-node', function() {
-            // Open add member modal
-            console.log('Empty slot clicked');
-        });
+        var profileModalInstance = null;
+
         $(document).on('click', '.custom-node', function() {
-            // Open add member modal
             const userId = $(this).data('user-id');
-            
             if (userId) {
                 openProfileModal(userId);
             }
         });
 
+        $(document).on('click', '.view-downline', function() {
+            const userId = $(this).data('user-id');
+            if (userId) {
+                window.location.href = "{{ route('user.genealogy') }}?user_id=" + userId;
+            }
+        });
+
         function openProfileModal(userId) {
             const modalEl = document.getElementById('userProfileModal');
-            const modal = new bootstrap.Modal(modalEl);
+            if (!profileModalInstance) {
+                profileModalInstance = new bootstrap.Modal(modalEl);
+            }
             const contentEl = document.getElementById('profileContent');
-            
-            // Show loading
+
             contentEl.innerHTML = `
                 <div class="text-center py-4">
                     <div class="spinner-border text-primary" role="status"></div>
                     <p class="mt-2 text-muted">Loading profile...</p>
                 </div>`;
-            
-            modal.show();
 
-            // Fetch modal content
+            profileModalInstance.show();
+
             fetch(`{{ url('/user-profile') }}/${userId}/modal`)
                 .then(res => {
-                    if (!res.ok) {
-                        throw new Error('HTTP ' + res.status);
-                    }
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
                     return res.text();
                 })
                 .then(html => {
@@ -660,7 +605,7 @@
                             Failed to load profile. Please try again.
                         </div>`;
                 });
-        }      
+        }
         
         
     </script>

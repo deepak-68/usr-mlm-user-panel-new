@@ -71,7 +71,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($fundRequests as $index => $request)
+                                @foreach($fundRequests as $index => $request)
                                 <tr>
                                     <td class="text-center fw-bold">{{ $loop->iteration }}</td>
                                     <td>
@@ -115,15 +115,7 @@
                                     </td>
                                     <td>{{ $request->admin_remark ?? '-' }}</td>
                                 </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="9" class="text-center py-5">
-                                        <i class="las la-clipboard-list fs-1 text-muted d-block mb-3"></i>
-                                        <h5 class="text-muted">No Fund Requests Found</h5>
-                                        <p class="text-muted mb-0">You haven't submitted any fund requests yet.</p>
-                                    </td>
-                                </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -151,9 +143,19 @@ $(document).ready(function() {
     $('#fundRequestTable').DataTable({
         responsive: true,
         pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        language: {
+            search: "Search:",
+            lengthMenu: "Show _MENU_ entries",
+            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            infoEmpty: "No entries available",
+            infoFiltered: "(filtered from _MAX_ total entries)",
+            zeroRecords: "No matching records found",
+            emptyTable: "No fund requests found"
+        },
         order: [[5, 'desc']],
         columnDefs: [
-            { orderable: false, targets: [6] }
+            { orderable: false, targets: [0, 7, 8] }
         ]
     });
 });

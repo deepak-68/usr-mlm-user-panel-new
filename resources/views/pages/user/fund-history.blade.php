@@ -67,7 +67,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($fundSummaries as $index => $fund)
+                                @foreach($fundSummaries as $index => $fund)
                                 <tr>
                                     <td class="text-center fw-bold">{{ $loop->iteration }}</td>
                                     <td>
@@ -95,15 +95,7 @@
                                         @endif
                                     </td>
                                 </tr>
-                                @empty
-                                {{-- <tr>
-                                    <td colspan="7" class="text-center py-5">
-                                        <i class="las la-history fs-1 text-muted d-block mb-3"></i>
-                                        <h5 class="text-muted">No Fund History Found</h5>
-                                        <p class="text-muted mb-0">No transactions available for the selected filters.</p>
-                                    </td>
-                                </tr> --}}
-                                @endforelse
+                                @endforeach
                             </tbody>
                             <tfoot class="table-dark">
                                 <tr>
@@ -125,18 +117,51 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
 @endpush
 
 @push('scripts')
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 
 <script>
 $(document).ready(function() {
     $('#fundHistoryTable').DataTable({
         responsive: true,
         pageLength: 10,
-        order: [[1, 'desc']]
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        language: {
+            search: "Search:",
+            lengthMenu: "Show _MENU_ entries",
+            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            infoEmpty: "No entries available",
+            infoFiltered: "(filtered from _MAX_ total entries)",
+            zeroRecords: "No matching records found",
+            emptyTable: "No fund history found"
+        },
+        order: [[1, 'desc']],
+        columnDefs: [
+            { orderable: false, targets: [0, 5, 6] }
+        ],
+        footerCallback: function(row, data, start, end, display) {
+            var api = this.api();
+            var intVal = function(i) {
+                return typeof i === 'string' ?
+                    i.replace(/[₹,]/g, '') * 1 :
+                    typeof i === 'number' ? i : 0;
+            };
+
+            var creditTotal = api.column(5).data().reduce(function(a, b) {
+                return intVal(a) + intVal(b);
+            }, 0);
+            var debitTotal = api.column(6).data().reduce(function(a, b) {
+                return intVal(a) + intVal(b);
+            }, 0);
+
+            $(api.column(5).footer()).html('₹' + creditTotal.toFixed(2));
+            $(api.column(6).footer()).html('₹' + debitTotal.toFixed(2));
+        }
     });
 });
 </script>

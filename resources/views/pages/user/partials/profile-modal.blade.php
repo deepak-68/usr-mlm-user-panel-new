@@ -10,6 +10,13 @@
     <p class="modal-subtitle">{{ '@' }}{{ $user->user_name ?? 'N/A' }} 
         ({{ (isset($stats['sponsor_id']) && $stats['sponsor_id'] !== 'Direct Seller') ? 'Sponsor: ' . $stats['sponsor_id'] : 'Direct Seller' }})
     </p>
+
+    <div class="mb-3">
+        <span class="badge bg-warning text-dark fw-semibold fs-14 px-3 py-2">
+            <i class="las la-trophy me-1"></i>
+            {{ $stats['rank'] ?? 'Fresh' }}
+        </span>
+    </div>
 </div>
 
 <div class="stats-grid mt-3">
@@ -23,11 +30,11 @@
     </div>
     <div class="stat-card right-bv">
         <div class="stat-label">Current Right CC</div>
-        <div class="stat-value" style="font-size: 14px;">{{ $stats['current_right_cc'] ?? 0 }}</div>
+        <div class="stat-value" style="font-size: 14px;">{{ number_format($stats['current_right_cc'] ?? 0) }}</div>
     </div>
     <div class="stat-card left-bv">
         <div class="stat-label">Current Left CC</div>
-        <div class="stat-value" style="font-size: 14px;">{{ $stats['current_left_cc'] ?? 0 }}</div>
+        <div class="stat-value" style="font-size: 14px;">{{ number_format($stats['current_left_cc'] ?? 0) }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-label">Active Right Team</div>
@@ -51,7 +58,7 @@
     </div>
     <div class="stat-card personal-bv">
         <div class="stat-label">CC Balance</div>
-        <div class="stat-value">{{ $stats['personal_bv'] ?? 0 }}</div>
+        <div class="stat-value">{{ number_format($stats['personal_bv'] ?? 0) }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-label">Package</div>
@@ -64,7 +71,12 @@
 </div>
 
 <div class="d-flex gap-2 mt-3">
-    <button class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Close</button>
+    <button class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">
+        <i class="las la-times me-1"></i> Close
+    </button>
+    <button class="btn btn-outline-primary flex-fill view-downline" data-user-id="{{ $user->id }}" data-bs-dismiss="modal">
+        <i class="las la-sitemap me-1"></i> View Downline
+    </button>
 </div>
 </div>
 @else

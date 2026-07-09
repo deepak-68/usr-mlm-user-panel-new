@@ -20,7 +20,7 @@ class CallbackController extends Controller
     {
         $whatsappNumber = null;
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/whatsapp-number");
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/whatsapp-number");
             if ($response->successful()) {
                 $whatsappNumber = $response->json('number');
             }
@@ -46,7 +46,7 @@ class CallbackController extends Controller
         ]);
 
         try {
-            $response = Http::timeout(30)->post("{$this->apiBaseUrl}/schedule-callback", [
+            $response = Http::withToken(session('token'))->timeout(30)->post("{$this->apiBaseUrl}/schedule-callback", [
                 'user_id'        => $userId,
                 'preferred_date' => $request->preferred_date,
                 'preferred_time' => $request->preferred_time,

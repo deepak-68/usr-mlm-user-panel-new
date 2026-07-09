@@ -64,12 +64,24 @@
                     </button>
                 </div>
 
-                <!-- Notification Bell -->
+                <!-- Notification Bell Dropdown -->
                 <div class="dropdown header-item">
-                    <a href="{{ route('user.notifications') }}" class="btn btn-icon btn-topbar btn-ghost-primary rounded-circle position-relative">
+                    <button type="button" class="btn btn-icon btn-topbar btn-ghost-primary rounded-circle position-relative" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class='las la-bell fs-24'></i>
                         <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px; display: none;">0</span>
-                    </a>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="notificationDropdown">
+                        <div class="dropdown-head bg-primary rounded-top d-flex align-items-center justify-content-between px-3 py-2">
+                            <h6 class="mb-0 text-white fs-14">Notifications</h6>
+                            <span class="badge bg-light text-dark" id="dropdownBadge">0</span>
+                        </div>
+                        <div class="notification-list" id="recentNotifications" style="max-height: 300px; overflow-y: auto;">
+                            <div class="text-center py-4 text-muted small">Loading...</div>
+                        </div>
+                        <a href="{{ route('user.notifications') }}" class="dropdown-item text-center fw-medium py-2 border-top">
+                            View All
+                        </a>
+                    </div>
                 </div>
 
                 <div class="dropdown header-item">
@@ -108,18 +120,77 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    fetch('{{ route("user.notifications.unread-count") }}', {
-        headers: { 'Accept': 'application/json' }
-    })
-    .then(res => res.json())
-    .then(json => {
-        const badge = document.getElementById('notificationBadge');
-        if (badge) {
-            const count = json.unread_count || 0;
-            badge.textContent = count;
-            badge.style.display = count > 0 ? 'inline' : 'none';
-        }
-    })
-    .catch(() => {});
+    const badge = document.getElementById('notificationBadge');
+    const dropdownBadge = document.getElementById('dropdownBadge');
+    const recentList = document.getElementById('recentNotifications');
+
+    function updateBadge(count) {
+        const c = count || 0;
+        if (badge) { badge.textContent = c; badge.style.display = c > 0 ? 'inline' : 'none'; }
+        if (dropdownBadge) dropdownBadge.textContent = c;
+    }
+
+    function loadRecent() {
+        if (!recentList) return;
+        recentList.innerHTML = '<div class="text-center py-4 text-muted small">Loading...</div>';
+
+        fetch('{{ route("user.notifications.recent") }}', {
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(json => {
+            if (!json.success) {
+                recentList.innerHTML = '<div class="text-center py-4 text-muted small">Failed to load.</div>';
+                return;
+            }
+            const notifications = json.data?.data || [];
+            updateBadge(json.unread_count);
+
+            if (!notifications.length) {
+                recentList.innerHTML = '<div class="text-center py-4 text-muted small"><i class="las la-bell-slash fs-4 d-block mb-1"></i>No notifications</div>';
+                return;
+            }
+
+            recentList.innerHTML = '';
+            notifications.forEach(n => {
+                const icons = {
+                    'purchase': 'las la-shopping-bag', 'income': 'las la-wallet',
+                    'rank': 'las la-trophy', 'reward': 'las la-gift',
+                    'registration': 'las la-user-plus', 'withdrawal': 'las la-credit-card',
+                    'ticket': 'las la-ticket',
+                };
+                const icon = icons[n.type] || 'las la-bell';
+                const time = new Date(n.created_at).toLocaleDateString('en-IN', {
+                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                });
+
+                const item = document.createElement('a');
+                item.href = '{{ route("user.notifications") }}';
+                item.className = 'dropdown-item d-flex align-items-start gap-2 py-2 px-3 border-bottom';
+                item.innerHTML = `
+                    <span class="badge bg-primary rounded-circle p-1 mt-1" style="font-size: 12px; min-width: 26px; text-align: center;">
+                        <i class="${icon}"></i>
+                    </span>
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="d-flex justify-content-between">
+                            <strong class="text-dark small">${n.title}</strong>
+                            <small class="text-muted ms-2 text-nowrap">${time}</small>
+                        </div>
+                        <small class="text-muted d-block text-truncate">${n.message || ''}</small>
+                    </div>
+                `;
+                recentList.appendChild(item);
+            });
+        })
+        .catch(() => {
+            if (recentList) recentList.innerHTML = '<div class="text-center py-4 text-muted small">Error loading.</div>';
+        });
+    }
+
+    // Initial load
+    loadRecent();
+
+    // Refresh unread count every 30s
+    setInterval(loadRecent, 30000);
 });
 </script>

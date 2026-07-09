@@ -55,7 +55,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-3">
                     <div class="table-responsive">
-                        <table class="table table-bordered w-100" id="directIncomeTable">
+                        <table class="table table-bordered w-100" id="matchingIncomeTable">
                             <thead class="table-dark">
                                 <tr>
                                     <th class="text-center" style="width: 50px;">SrNo</th>
@@ -89,7 +89,7 @@
 
 @push('scripts')
     <script>
-        let directIncomeTable = $('#directIncomeTable').DataTable({
+        let matchingIncomeTable = $('#matchingIncomeTable').DataTable({
             processing: true,
             serverSide: true,
              ajax: {
@@ -115,20 +115,16 @@
                      
                 },
                 {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: function() {
-                        return 'N/A';
+                    data: 'reference_type',
+                    name: 'reference_type',
+                    render: function(data) {
+                        return data ? data.replace(/_/g, ' ').toUpperCase() : 'N/A';
                     }
                 },
                 {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: function() {
-                        return 'N/A';
-                    }
+                    data: 'reference_id',
+                    name: 'reference_id',
+                    defaultContent: '-'
                 },
                 {
                     data: null,

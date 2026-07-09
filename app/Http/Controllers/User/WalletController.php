@@ -23,6 +23,7 @@ class WalletController extends Controller
         }
 
         $walletData = null;
+        $bankData = null;
 
         try {
             $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/wallet", [
@@ -36,7 +37,33 @@ class WalletController extends Controller
             session()->flash('error', 'Failed to load wallet data');
         }
 
-        return view('pages.user.wallet', compact('walletData'));
+        try {
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/user-bank-detail", [
+                'user_id' => $userId,
+            ]);
+
+            if ($response->successful()) {
+                $bankData = $response->json()['data'] ?? null;
+            }
+        } catch (\Exception $e) {
+            // Bank data is optional
+        }
+
+        // Fetch recent fund summary for the wallet
+        $recentTransactions = collect();
+        try {
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/fund-summary", [
+                'user_id' => $userId,
+            ]);
+
+            if ($response->successful()) {
+                $recentTransactions = collect($response->json()['data'] ?? [])->take(5);
+            }
+        } catch (\Exception $e) {
+            // Recent transactions are optional
+        }
+
+        return view('pages.user.wallet', compact('walletData', 'bankData', 'recentTransactions'));
     }
 
     public function getTransactions(Request $request)
@@ -47,7 +74,7 @@ class WalletController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/wallet/transactions", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/wallet/transactions", [
                 'user_id' => $userId,
                 'reference_type' => $request->reference_type ?? '',
                 'type' => $request->type ?? '',
@@ -95,7 +122,7 @@ class WalletController extends Controller
 
         try {
             // ✅ Call Admin Panel API
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/account-summary", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/account-summary", [
                 'user_id' => $userId,
                 'type' => $request->get('type', 'all'),
                 'date_from' => $request->date_from ?? '',

@@ -308,7 +308,7 @@ $(document).ready(function () {
         pageLength: 12,
         lengthMenu: [[10, 12, 25, 50, -1], [10, 12, 25, 50, 'All']],
         columnDefs: [
-            { orderable: false, targets: [11] }
+            { orderable: false, targets: [10] }
         ],
         language: {
             search: '<i class="las la-search"></i>',

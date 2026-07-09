@@ -95,6 +95,7 @@ class GrievanceController extends Controller
                 'url' => "{$this->apiBaseUrl}/raise-ticket"
             ]);
 
+            $httpRequest = $httpRequest->withToken(session('token'));
             $response = $httpRequest->post(
                 "{$this->apiBaseUrl}/raise-ticket",
                 $payload
@@ -156,7 +157,7 @@ class GrievanceController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/outbox", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/outbox", [
                 'user_id' => $userId,
                 // 'status'  => $request->status ?? '',
             ]);
@@ -181,7 +182,7 @@ class GrievanceController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/ticket-messages/{$id}");
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/ticket-messages/{$id}");
 
             return $response->successful()
                 ? response()->json($response->json())
@@ -202,12 +203,12 @@ class GrievanceController extends Controller
         }
 
         $request->validate([
-            'ticket_id' => 'required|exists:grivances,id',
+            'ticket_id' => 'required',
             'message'   => 'required|string',
         ]);
 
         try {
-            $httpRequest = Http::timeout(30);
+            $httpRequest = Http::withToken(session('token'))->timeout(30);
 
             if ($request->hasFile('attachment')) {
                 $file = $request->file('attachment');
@@ -253,7 +254,7 @@ class GrievanceController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/grievances/inbox", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/grievances/inbox", [
                 'user_id' => $userId,
                 'status'  => $request->status ?? '',
             ]);

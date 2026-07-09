@@ -45,6 +45,34 @@ class BankDetailController extends Controller
         }
     }
 
+    public function delete(Request $request)
+    {
+        $userId = session('user_id');
+        if (!$userId) {
+            return response()->json(['success' => false, 'message' => 'Not logged in'], 401);
+        }
+
+        try {
+            $response = Http::withToken(session('token'))
+                ->timeout(10)
+                ->delete("{$this->apiBaseUrl}/user-bank-detail/{$userId}");
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $response->json('message', 'Failed to delete'),
+            ], $response->status());
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function save(Request $request)
     {
         $userId = session('user_id');

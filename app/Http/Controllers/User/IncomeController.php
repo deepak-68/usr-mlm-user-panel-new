@@ -25,7 +25,7 @@ class IncomeController extends Controller
         }
 
         if ($request->ajax()) {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/income-log", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/income-log", [
                 'user_id' => $userId,
                 'income_type' => $request->income_type ?? 'all',
                 'from_date' => $request->from_date ?? '',

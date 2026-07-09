@@ -29,7 +29,7 @@ class MatchingIncomeController extends Controller
         }
 
         if($request->ajax()){
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/matching-income", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/matching-income", [
                 'user_id' => $userId,
                 'date_from' => $request->date_from ?? '',
                 'date_to' => $request->date_to ?? '',
@@ -122,7 +122,7 @@ class MatchingIncomeController extends Controller
 
         try {
             // Call Admin Panel API
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/matching-income", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/matching-income", [
                 'user_id' => $userId,
                 'date_from' => $request->date_from ?? '',
                 'date_to' => $request->date_to ?? '',

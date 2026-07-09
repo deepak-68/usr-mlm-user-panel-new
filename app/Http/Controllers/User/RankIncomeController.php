@@ -28,7 +28,7 @@ class RankIncomeController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->get("{$this->apiBaseUrl}/rank-income", [
+            $response = Http::withToken(session('token'))->timeout(10)->get("{$this->apiBaseUrl}/rank-income", [
                 'user_id' => $userId,
                 'date_from' => $request->date_from ?? '',
                 'date_to' => $request->date_to ?? '',
