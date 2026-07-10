@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
@@ -47,41 +46,17 @@ class LoginController extends Controller
                 ->withInput();
         }
 
-       try {
-
-            Log::info('Login API Request', [
-                'url' => $this->apiBaseUrl . '/login',
-                'username' => $request->username,
-            ]);
-
-            $response = Http::timeout(10)->post($this->apiBaseUrl . '/login', [
-                'username' => $request->username,
-                'password' => $request->password,
-            ]);
-
-            Log::info('Login API Response', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-
-        } catch (\Exception $e) {
-
-            Log::error('Login API Error', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ]);
-
-            throw $e;
-        }
-
+        $response = Http::timeout(10)->post($this->apiBaseUrl.'/login', [
+            'username' => $request->username,
+            'password' => $request->password,
+        ]);
 
         // dd($response->json()); // Debugging line to inspect the response
 
         if (!$response->successful()) {
             return back()
                 ->withErrors([
-                    'username' => 'Invalid credentials..'
+                    'username' => 'Invalid credentials.'
                 ])
                 ->withInput($request->only('username'));
         }
