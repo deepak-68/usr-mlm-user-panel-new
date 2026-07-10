@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
@@ -46,10 +47,23 @@ class LoginController extends Controller
                 ->withInput();
         }
 
-        $response = Http::timeout(10)->post($this->apiBaseUrl.'/login', [
+       Log::info('Login API Request', [
+            'url' => $this->apiBaseUrl . '/login',
+            'username' => $request->username,
+        ]);
+
+        $response = Http::timeout(10)->post($this->apiBaseUrl . '/login', [
             'username' => $request->username,
             'password' => $request->password,
         ]);
+
+        Log::info('Login API Response', [
+            'status' => $response->status(),
+            'successful' => $response->successful(),
+            'body' => $response->body(),
+            'json' => $response->json(),
+        ]);
+
 
         // dd($response->json()); // Debugging line to inspect the response
 
