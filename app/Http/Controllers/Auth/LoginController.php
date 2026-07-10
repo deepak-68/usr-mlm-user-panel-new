@@ -47,22 +47,33 @@ class LoginController extends Controller
                 ->withInput();
         }
 
-       Log::info('Login API Request', [
-            'url' => $this->apiBaseUrl . '/login',
-            'username' => $request->username,
-        ]);
+       try {
 
-        $response = Http::timeout(10)->post($this->apiBaseUrl . '/login', [
-            'username' => $request->username,
-            'password' => $request->password,
-        ]);
+            Log::info('Login API Request', [
+                'url' => $this->apiBaseUrl . '/login',
+                'username' => $request->username,
+            ]);
 
-        Log::info('Login API Response', [
-            'status' => $response->status(),
-            'successful' => $response->successful(),
-            'body' => $response->body(),
-            'json' => $response->json(),
-        ]);
+            $response = Http::timeout(10)->post($this->apiBaseUrl . '/login', [
+                'username' => $request->username,
+                'password' => $request->password,
+            ]);
+
+            Log::info('Login API Response', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+        } catch (\Exception $e) {
+
+            Log::error('Login API Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            throw $e;
+        }
 
 
         // dd($response->json()); // Debugging line to inspect the response
