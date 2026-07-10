@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
@@ -21,6 +20,7 @@ class LoginController extends Controller
 
     public function handleLogin(Request $request)
     {
+        // dd(Session::all());
         if ($request->isMethod('get')) {
             return view('pages.auth.login');
         }
@@ -51,16 +51,12 @@ class LoginController extends Controller
             'password' => $request->password,
         ]);
 
-        Log::info('API Login Response', [
-            'status' => $response->status(),
-            'body' => $response->body(),
-        ]);
-
+        // dd($response->json()); // Debugging line to inspect the response
 
         if (!$response->successful()) {
             return back()
                 ->withErrors([
-                    'username' => 'Invalid credentials.'
+                    'username' => 'Invalid credentials..'
                 ])
                 ->withInput($request->only('username'));
         }
